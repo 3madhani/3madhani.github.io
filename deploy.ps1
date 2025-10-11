@@ -1,18 +1,30 @@
-Write-Host "🚀 Building Flutter Web..."
+# deploy.ps1
+$ErrorActionPreference = "Stop"
 
-flutter clean
-flutter pub get
+Write-Host "`n🚀 Building Flutter Web..." -ForegroundColor Cyan
+
 flutter build web --release
 
-Write-Host "📦 Committing source code..."
-git add .
-git commit -m "Update Flutter web build $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")" | Out-Null
-git push origin master
+Write-Host "`n📦 Checking for source changes..." -ForegroundColor Yellow
 
-Write-Host "🌐 Deploying to GitHub Pages..."
-# Create a temporary branch from build/web and push it as gh-pages
+# Commit changes on master only if there are any
+if ((git status --porcelain) -ne "") {
+    git add .
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    git commit -m "Update Flutter web build $timestamp"
+    git push origin master
+    Write-Host "✔ Changes committed and pushed to master." -ForegroundColor Green
+}
+else {
+    Write-Host "ℹ No source changes to commit." -ForegroundColor DarkYellow
+}
+
+Write-Host "`n🌐 Deploying to GitHub Pages..." -ForegroundColor Cyan
+
+# Split and deploy build/web to gh-pages
 git subtree split --prefix build/web -b gh-pages-temp
 git push origin gh-pages-temp:gh-pages --force
 git branch -D gh-pages-temp
 
-Write-Host "✅ Deployment complete! Visit https://3madhani.github.io"
+Write-Host "`n✅ Deployment complete!" -ForegroundColor Green
+Write-Host "🌍 Visit: https://3madhani.github.io" -ForegroundColor Blue
