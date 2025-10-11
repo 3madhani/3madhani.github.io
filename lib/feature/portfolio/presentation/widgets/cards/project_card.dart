@@ -26,144 +26,155 @@ class _ProjectCardState extends State<ProjectCard>
       int.parse(widget.project.color.replaceAll('#', '0xFF')),
     );
 
-    return AnimatedBuilder(
-      animation: _hoverController,
-      builder: (context, child) =>
-          Transform.scale(scale: _scaleAnim.value, child: child),
-      child: MouseRegion(
-        onEnter: (_) => _onHover(true),
-        onExit: (_) => _onHover(false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: Card(
-            elevation: _elevationAnim.value,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Image/icon area
-                Container(
-                  height: 140,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                    gradient: LinearGradient(
-                      colors: [color.withOpacity(0.3), color.withOpacity(0.1)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: Icon(Icons.flutter_dash, size: 56, color: color),
+    return Flexible(
+      child: AnimatedBuilder(
+        animation: _hoverController,
+        builder: (context, child) =>
+            Transform.scale(scale: _scaleAnim.value, child: child),
+        child: MouseRegion(
+          onEnter: (_) => _onHover(true),
+          onExit: (_) => _onHover(false),
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: Card(
+              elevation: _elevationAnim.value,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Image/icon area
+                  Container(
+                    height: 140,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(16),
                       ),
-                      if (widget.project.isFeatured)
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              '✨ Featured',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onPrimary,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                // Content
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      gradient: LinearGradient(
+                        colors: [
+                          color.withOpacity(0.3),
+                          color.withOpacity(0.1),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Stack(
                       children: [
-                        // Title
-                        Text(
-                          widget.project.title,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                        Center(
+                          child: Icon(
+                            Icons.flutter_dash,
+                            size: 56,
+                            color: color,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
-                        // Description
-                        Text(
-                          widget.project.description,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const Spacer(),
-                        // Technologies
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 4,
-                          children: widget.project.technologies.map((tech) {
-                            return Container(
+                        if (widget.project.isFeatured)
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color:
-                                    theme.colorScheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(8),
+                                color: theme.colorScheme.primary,
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                tech,
-                                style: theme.textTheme.bodySmall,
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 12),
-                        // Action buttons
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () =>
-                                    _openUrl(widget.project.githubUrl),
-                                icon: const Icon(Icons.code, size: 16),
-                                label: const Text('Source'),
-                              ),
-                            ),
-                            if (widget.project.demoUrl != null)
-                              const SizedBox(width: 8),
-                            if (widget.project.demoUrl != null)
-                              Expanded(
-                                child: FilledButton.icon(
-                                  onPressed: () =>
-                                      _openUrl(widget.project.demoUrl!),
-                                  icon: const Icon(Icons.launch, size: 16),
-                                  label: const Text('Demo'),
+                                '✨ Featured',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onPrimary,
                                 ),
                               ),
-                          ],
-                        ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
-                ),
-              ],
+                  // Content
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title
+                          Text(
+                            widget.project.title,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          // Description
+                          Text(
+                            widget.project.description,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withOpacity(
+                                0.7,
+                              ),
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Spacer(),
+                          // Technologies
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: widget.project.technologies.map((tech) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      theme.colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  tech,
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 12),
+                          // Action buttons
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () =>
+                                      _openUrl(widget.project.githubUrl),
+                                  icon: const Icon(Icons.code, size: 16),
+                                  label: const Text('Source'),
+                                ),
+                              ),
+                              if (widget.project.demoUrl != null)
+                                const SizedBox(width: 8),
+                              if (widget.project.demoUrl != null)
+                                Expanded(
+                                  child: FilledButton.icon(
+                                    onPressed: () =>
+                                        _openUrl(widget.project.demoUrl!),
+                                    icon: const Icon(Icons.launch, size: 16),
+                                    label: const Text('Demo'),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

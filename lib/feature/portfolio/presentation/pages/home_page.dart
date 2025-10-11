@@ -1,3 +1,5 @@
+// lib/features/portfolio/presentation/pages/home_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -32,11 +34,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool _themePanelVisible = false;
-
-  final PageController _pageController = PageController();
-  final ScrollController _scrollController = ScrollController();
-  int _currentIndex = 0;
   bool _showLoading = true;
+  int _currentIndex = 0;
+
+  final ScrollController _scrollController = ScrollController();
+  final List<GlobalKey> _sectionKeys = List.generate(5, (_) => GlobalKey());
   final List<String> _sectionTitles = [
     'Home',
     'About',
@@ -48,7 +50,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = ResponsiveHelper.isMobile(context);
-    final isTablet = ResponsiveHelper.isTablet(context);
     final isDesktop = ResponsiveHelper.isDesktop(context);
 
     if (_showLoading) {
@@ -60,111 +61,139 @@ class _HomePageState extends State<HomePage> {
     return MagicCursorOverlay(
       enabled: isDesktop,
       child: Scaffold(
-        appBar: isMobile
-            ? null
-            : CustomAppBar(
-                onPressed: () => _toggleThemePanel(),
-                currentIndex: _currentIndex,
-                onSectionTapped: _navigateToSection,
-                sectionTitles: _sectionTitles,
-              ),
-        body: Stack(
-          children: [
-            BlocBuilder<PortfolioBloc, PortfolioState>(
-              builder: (context, state) {
-                if (state is PortfolioLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is PortfolioError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Oops! Something went wrong',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Error: ${state.message}',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withOpacity(0.7),
-                              ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        FilledButton.icon(
-                          onPressed: () => context.read<PortfolioBloc>().add(
-                            const LoadPortfolioData(),
-                          ),
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-                if (state is PortfolioLoaded) {
-                  return _buildMainContent(state, isMobile, isTablet);
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-
-            if (isDesktop)
-              ScrollToTopButton(scrollController: _scrollController),
-            if (isDesktop) const PerformanceMonitor(),
-
-            // Theme panel overlay
-            ThemePanel(
-              isVisible: _themePanelVisible,
-              onClose: () => _toggleThemePanel(),
-            ),
-          ],
-        ),
-        bottomNavigationBar: isMobile
-            ? NavigationBar(
-                selectedIndex: _currentIndex,
-                onDestinationSelected: _navigateToSection,
-                destinations: _sectionTitles
-                    .asMap()
-                    .entries
-                    .map(
-                      (e) => NavigationDestination(
-                        icon: _getSectionIcon(e.key),
-                        label: e.value,
-                      ),
-                    )
-                    .toList(),
+        drawer: isMobile
+            ? Drawer(
+                child: CustomNavigationRail(
+                  selectedIndex: _currentIndex,
+                  onDestinationSelected: (i) {
+                    Navigator.pop(context);
+                    _scrollTo(i);
+                  },
+                  sectionTitles: _sectionTitles,
+                ),
               )
             : null,
-        floatingActionButton: isMobile
-            ? Column(
-                children: [
+        appBar: isMobile
+            ? AppBar(
+                title: const Text('Emad Hany'),
+                leading: Builder(
+                  builder: (ctx) {
+                    return IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => Scaffold.of(ctx).openDrawer(),
+                    );
+                  },
+                ),
+                actions: [
                   const ThemeSwitcher(),
                   IconButton(
-                    icon: Icon(Icons.palette),
+                    icon: const Icon(Icons.palette),
                     onPressed: () => setState(() => _themePanelVisible = true),
                   ),
                 ],
               )
-            : SizedBox.shrink(),
+            : CustomAppBar(
+                onPressed: () =>
+                    setState(() => _themePanelVisible = !_themePanelVisible),
+                currentIndex: _currentIndex,
+                onSectionTapped: _scrollTo,
+                sectionTitles: _sectionTitles,
+              ),
+        body: BlocBuilder<PortfolioBloc, PortfolioState>(
+          builder: (context, state) {
+            if (state is PortfolioLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is PortfolioError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Oops! Something went wrong',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Error: ${state.message}',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton.icon(
+                      onPressed: () => context.read<PortfolioBloc>().add(
+                        const LoadPortfolioData(),
+                      ),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            }
+            if (state is PortfolioLoaded) {
+              final sections = [
+                Container(key: _sectionKeys[0], child: const HeroSection()),
+                Container(
+                  key: _sectionKeys[1],
+                  child: AboutSection(experiences: state.experiences),
+                ),
+                Container(
+                  key: _sectionKeys[2],
+                  child: SkillsSection(skills: state.skills),
+                ),
+                Container(
+                  key: _sectionKeys[3],
+                  child: ProjectsSection(
+                    projects: state.filteredProjects,
+                    selectedCategory: state.selectedCategory,
+                  ),
+                ),
+                Container(key: _sectionKeys[4], child: const ContactSection()),
+              ];
+
+              final content = SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(children: sections),
+              );
+
+              return Stack(
+                children: [
+                  content,
+                  if (isDesktop) ...[
+                    ScrollToTopButton(scrollController: _scrollController),
+                    const PerformanceMonitor(),
+                  ],
+                  ThemePanel(
+                    isVisible: _themePanelVisible,
+                    onClose: () => setState(() => _themePanelVisible = false),
+                  ),
+                ],
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+        floatingActionButton: !isDesktop
+            ? ScrollToTopButton(scrollController: _scrollController)
+            : null,
       ),
     );
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
@@ -173,95 +202,40 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     context.read<PortfolioBloc>().add(const LoadPortfolioData());
-    Future.delayed(const Duration(seconds: 5), () {
-      if (mounted) {
-        setState(() => _showLoading = false);
-      }
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _showLoading = false);
     });
+    _scrollController.addListener(_onScroll);
   }
 
-  Widget _buildMainContent(
-    PortfolioLoaded state,
-    bool isMobile,
-    bool isTablet,
-  ) {
-    final sections = [
-      const HeroSection(),
-      AboutSection(experiences: state.experiences),
-      SkillsSection(skills: state.skills),
-      ProjectsSection(
-        projects: state.filteredProjects,
-        selectedCategory: state.selectedCategory,
-      ),
-      const ContactSection(),
-    ];
-
-    if (isMobile) {
-      return PageView(
-        controller: _pageController,
-        onPageChanged: (i) => setState(() => _currentIndex = i),
-        children: sections,
-      );
-    } else if (isTablet) {
-      return Row(
-        children: [
-          CustomNavigationRail(
-            selectedIndex: _currentIndex,
-            onDestinationSelected: _navigateToSection,
-            sectionTitles: _sectionTitles,
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(children: sections),
-            ),
-          ),
-        ],
-      );
-    } else {
-      return SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(children: sections),
-      );
+  void _onScroll() {
+    final offset = _scrollController.offset;
+    final height = MediaQuery.of(context).size.height;
+    for (var i = 0; i < _sectionKeys.length; i++) {
+      final key = _sectionKeys[i];
+      final ctx = key.currentContext;
+      if (ctx != null) {
+        final box = ctx.findRenderObject() as RenderBox;
+        final pos = box.localToGlobal(Offset.zero).dy + offset;
+        if (offset >= pos - height / 2 &&
+            offset < pos + box.size.height - height / 2) {
+          if (_currentIndex != i) setState(() => _currentIndex = i);
+          break;
+        }
+      }
     }
   }
 
-  Widget _getSectionIcon(int index) {
-    switch (index) {
-      case 0:
-        return const Icon(Icons.home_rounded);
-      case 1:
-        return const Icon(Icons.person_rounded);
-      case 2:
-        return const Icon(Icons.code_rounded);
-      case 3:
-        return const Icon(Icons.work_rounded);
-      case 4:
-        return const Icon(Icons.contact_mail_rounded);
-      default:
-        return const Icon(Icons.circle);
+  void _scrollTo(int index) {
+    final key = _sectionKeys[index];
+    final ctx = key.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
     }
-  }
-
-  void _navigateToSection(int index) {
     setState(() => _currentIndex = index);
-    if (ResponsiveHelper.isMobile(context)) {
-      _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      final height = MediaQuery.of(context).size.height;
-      _scrollController.animateTo(
-        index * height,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
-  void _toggleThemePanel() {
-    setState(() => _themePanelVisible = !_themePanelVisible);
   }
 }

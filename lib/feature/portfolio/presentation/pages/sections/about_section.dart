@@ -18,14 +18,12 @@ class AboutSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = ResponsiveHelper.isMobile(context);
 
-    // Always wrap in scroll so content never overflows
     return Stack(
       children: [
         const Positioned.fill(child: FloatingShapes(shapeCount: 3)),
         SectionWrapper(
           title: 'About Me',
           subtitle: 'Get to know the magic behind the code',
-          // Use SingleChildScrollView to ensure bounded height
           child: SingleChildScrollView(
             child: Padding(
               padding: ResponsiveHelper.getScreenPadding(context),
@@ -34,59 +32,60 @@ class AboutSection extends StatelessWidget {
                     ? CrossAxisAlignment.center
                     : CrossAxisAlignment.start,
                 children: [
-                  // Text + optional CodeWindow side by side or stacked
                   LayoutBuilder(
                     builder: (c, box) {
                       final wide = box.maxWidth > 700;
-                      return wide
-                          ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: _textBlock(context, isMobile),
-                                ),
-                                const SizedBox(width: 48),
-                                Expanded(
-                                  flex: 2,
-                                  child: Tilt3D(
-                                    maxTilt: 20,
-                                    perspective: 0.001,
-                                    child: const CodeWindow(),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                _textBlock(context, isMobile),
-                                const SizedBox(height: 40),
-                                Tilt3D(
-                                  perspective: 0.001,
-                                  child: const CodeWindow(),
-                                ),
-                              ],
-                            );
+                      if (wide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: _textBlock(context, isMobile),
+                            ),
+                            const SizedBox(width: 48),
+                            Expanded(
+                              flex: 2,
+                              child: Tilt3D(
+                                maxTilt: 20,
+                                perspective: 0.001,
+                                child: const CodeWindow(),
+                              ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return Column(
+                          children: [
+                            _textBlock(context, isMobile),
+                            const SizedBox(height: 40),
+                            Tilt3D(
+                              maxTilt: 20,
+                              perspective: 0.001,
+                              child: const CodeWindow(),
+                            ),
+                          ],
+                        );
+                      }
                     },
                   ),
                   const SizedBox(height: 40),
                   RevealAnimation(
                     delay: const Duration(milliseconds: 700),
-                    duration: const Duration(seconds: 2),
                     child: const _StatisticsRow(),
                   ),
                   const SizedBox(height: 32),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      CustomButton(
-                        text: 'Download Resume',
-                        icon: Icons.download,
-                        onPressed: () {},
-                        type: CustomButtonType.outline,
-                        fullWidth: isMobile,
-                      ),
-                    ],
+                  Align(
+                    alignment: isMobile
+                        ? Alignment.center
+                        : Alignment.centerRight,
+                    child: CustomButton(
+                      text: 'Download Resume',
+                      icon: Icons.download,
+                      onPressed: () {},
+                      type: CustomButtonType.outline,
+                      fullWidth: isMobile,
+                    ),
                   ),
                 ],
               ),
@@ -137,28 +136,38 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            Icon(icon, size: 32, color: theme.colorScheme.primary),
-            const SizedBox(height: 16),
-            AnimatedCounter(
-              value: value,
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.primary,
+    final isMobile = ResponsiveHelper.isMobile(context);
+    final isTablet = ResponsiveHelper.isTablet(context);
+    final cardWidth = isMobile
+        ? MediaQuery.sizeOf(context).width - 32
+        : isTablet
+        ? MediaQuery.sizeOf(context).width / 3
+        : MediaQuery.sizeOf(context).width / 4;
+    return SizedBox(
+      width: cardWidth,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              Icon(icon, size: 32, color: theme.colorScheme.primary),
+              const SizedBox(height: 16),
+              AnimatedCounter(
+                value: value,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: theme.textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -181,33 +190,31 @@ class _StatisticsRow extends StatelessWidget {
       return Column(
         children: stats.map((s) {
           return Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Tilt3D(
-              child: _StatCard(
-                value: s['value'] as int,
-                label: s['label'] as String,
-                icon: s['icon'] as IconData,
-              ),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: _StatCard(
+              value: s['value'] as int,
+              label: s['label'] as String,
+              icon: s['icon'] as IconData,
             ),
           );
         }).toList(),
       );
     }
 
-    return Row(
-      spacing: 40,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: stats.map((s) {
-        return Expanded(
-          child: Tilt3D(
-            child: _StatCard(
-              value: s['value'] as int,
-              label: s['label'] as String,
-              icon: s['icon'] as IconData,
-            ),
-          ),
-        );
-      }).toList(),
+    return Center(
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 24,
+        runSpacing: 24,
+        children: stats.map((s) {
+          return _StatCard(
+            value: s['value'] as int,
+            label: s['label'] as String,
+            icon: s['icon'] as IconData,
+          );
+        }).toList(),
+      ),
     );
   }
 }

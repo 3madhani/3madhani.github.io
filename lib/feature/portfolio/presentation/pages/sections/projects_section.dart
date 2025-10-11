@@ -1,11 +1,9 @@
-// lib/features/portfolio/presentation/pages/sections/projects_section.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_app/core/widgets/floating_shapes.dart';
 import 'package:test_app/core/widgets/tilt_3d.dart';
 
-import '../../../../../core/utils/responsive_helper.dart';
+import '../../../../../core/utils/responsive_grid_delegate.dart';
 import '../../../../../core/widgets/magnetic_button.dart';
 import '../../../../../core/widgets/section_wrapper.dart';
 import '../../../domain/entities/project.dart';
@@ -27,8 +25,6 @@ class ProjectsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = ResponsiveHelper.isMobile(context);
-
     return Stack(
       children: [
         const Positioned.fill(child: FloatingShapes(shapeCount: 4)),
@@ -90,15 +86,13 @@ class ProjectsSection extends StatelessWidget {
                         child: GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: ResponsiveHelper.getGridColumns(
-                                  context,
-                                ),
-                                crossAxisSpacing: 24,
-                                mainAxisSpacing: 24,
-                                childAspectRatio: isMobile ? 0.8 : 0.75,
-                              ),
+                          gridDelegate: SliverGridDelegateWithResponsiveColumns(
+                            childAspectRatio: 1.0,
+                            context: context,
+                            minItemWidth: 280,
+                            crossAxisSpacing: 24,
+                            mainAxisSpacing: 24,
+                          ),
                           itemCount: projects.length,
                           itemBuilder: (context, index) {
                             final project = projects[index];

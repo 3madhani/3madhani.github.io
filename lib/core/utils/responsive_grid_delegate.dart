@@ -23,7 +23,7 @@ class SliverGridDelegateWithResponsiveColumns extends SliverGridDelegate {
     final availableWidth = constraints.crossAxisExtent;
 
     // Calculate number of columns based on minimum item width
-    final crossAxisCount = (availableWidth / minItemWidth).floor().clamp(1, 6);
+    final crossAxisCount = (availableWidth / minItemWidth).floor().clamp(2, 8);
 
     // Calculate actual item width
     final itemWidth =

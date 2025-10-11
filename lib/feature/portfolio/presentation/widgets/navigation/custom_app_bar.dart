@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_app/core/widgets/animated_text.dart';
-import 'package:test_app/core/widgets/custom_button.dart';
-
-import '../../bloc/theme_cubit/theme_cubit.dart';
-import '../../bloc/theme_cubit/theme_state.dart';
+import 'package:test_app/core/widgets/magnetic_button.dart';
+import 'package:test_app/feature/portfolio/presentation/widgets/navigation/theme_switcher.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int currentIndex;
@@ -57,35 +54,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           );
         }),
 
-        BlocBuilder<ThemeCubit, ThemeState>(
-          builder: (context, state) {
-            return IconButton(
-              onPressed: () => context.read<ThemeCubit>().toggleTheme(),
-              icon: Icon(_getThemeIcon(state.themeMode)),
-            );
-          },
-        ),
+        ThemeSwitcher(),
 
-        CustomButton(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          text: "Color Theme",
-          onPressed: onPressed,
-          type: CustomButtonType.ghost,
-          icon: Icons.color_lens_rounded,
+        MagneticButton(
+          radius: 20,
+          onTap: onPressed ?? () {},
+          child: Icon(Icons.palette, color: theme.colorScheme.onSurface),
         ),
         SizedBox(width: 10),
       ],
     );
-  }
-
-  IconData _getThemeIcon(ThemeMode themeMode) {
-    switch (themeMode) {
-      case ThemeMode.light:
-        return Icons.light_mode;
-      case ThemeMode.dark:
-        return Icons.dark_mode;
-      case ThemeMode.system:
-        return Icons.brightness_auto;
-    }
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/widgets/glass_container.dart';
 import '../../../domain/entities/skill.dart';
 
 IconData _iconFor(String icon) {
@@ -81,111 +80,108 @@ class _SkillCardState extends State<SkillCard>
                 child: child,
               );
             },
-            child: GlassContainer(
-              blur: 12,
-              opacity: 0.08,
-              borderRadius: BorderRadius.circular(16),
-              child: Card(
-                elevation: _elevationAnim.value,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(padding),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // 🟣 Icon
-                      Container(
-                        width: containerSize,
-                        height: containerSize,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          _iconFor(widget.skill.icon),
-                          size: iconSize,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
+            child: Card(
+              elevation: _elevationAnim.value,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(padding),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // 🟣 Icon
+                    Container(
+                      width: containerSize,
+                      height: containerSize,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      SizedBox(height: isMobile ? 10 : 16),
-
-                      // 🟣 Skill Name
-                      Text(
-                        widget.skill.name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: fontSize + 1,
-                        ),
-                        textAlign: TextAlign.center,
+                      child: Icon(
+                        _iconFor(widget.skill.icon),
+                        size: iconSize,
+                        color: theme.colorScheme.onPrimaryContainer,
                       ),
-                      SizedBox(height: isMobile ? 8 : 12),
+                    ),
+                    SizedBox(height: isMobile ? 10 : 16),
 
-                      // 🟣 Progress Bar
-                      AnimatedBuilder(
-                        animation: _hoverController,
-                        builder: (context, _) {
-                          return Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Proficiency',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      fontSize: fontSize - 1,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${widget.skill.level}%',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: fontSize - 1,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 6),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: LinearProgressIndicator(
-                                  value: _progressAnim.value,
-                                  minHeight: progressHeight,
-                                  backgroundColor:
-                                      theme.colorScheme.surfaceContainerHighest,
-                                  valueColor: AlwaysStoppedAnimation(
-                                    theme.colorScheme.primary,
+                    // 🟣 Skill Name
+                    Text(
+                      widget.skill.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: fontSize + 1,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: isMobile ? 8 : 12),
+
+                    // 🟣 Progress Bar
+                    AnimatedBuilder(
+                      animation: _hoverController,
+                      builder: (context, _) {
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Proficiency',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontSize: fontSize - 1,
                                   ),
                                 ),
+                                Text(
+                                  '${widget.skill.level}%',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: fontSize - 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 6),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: _progressAnim.value,
+                                minHeight: progressHeight,
+                                backgroundColor:
+                                    theme.colorScheme.surfaceContainerHighest,
+                                valueColor: AlwaysStoppedAnimation(
+                                  theme.colorScheme.primary,
+                                ),
                               ),
-                            ],
-                          );
-                        },
-                      ),
-                      SizedBox(height: isMobile ? 10 : 16),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    SizedBox(height: isMobile ? 10 : 16),
 
-                      // 🟣 Category badge
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isMobile ? 10 : 12,
-                          vertical: isMobile ? 4 : 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.tertiaryContainer,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          _categoryName(widget.skill.category),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            fontSize: fontSize - 2,
-                          ),
+                    // 🟣 Category badge
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 10 : 12,
+                        vertical: isMobile ? 4 : 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _categoryName(widget.skill.category),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: fontSize - 2,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

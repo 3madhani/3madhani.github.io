@@ -29,12 +29,10 @@ class _ThemeSwitcherState extends State<ThemeSwitcher>
           builder: (context, child) {
             return Transform.scale(
               scale: _pulseAnimation.value,
-              child: FloatingActionButton(
+              child: IconButton(
+                color: theme.colorScheme.primary,
                 onPressed: _onThemeToggle,
-                backgroundColor: theme.colorScheme.primaryContainer,
-                foregroundColor: theme.colorScheme.onPrimaryContainer,
-                elevation: 6,
-                child: Transform.rotate(
+                icon: Transform.rotate(
                   angle: _rotationAnimation.value * 6.28318, // 2π radians
                   child: Icon(_getThemeIcon(state.themeMode), size: 24),
                 ),
