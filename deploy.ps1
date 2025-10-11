@@ -21,6 +21,3 @@ git branch -D gh-pages-temp
 
 Write-Host "✅ Deployment complete!" -ForegroundColor Green
 Write-Host "🌍 Visit: https://3madhani.github.io"
-
-Read-Host -Prompt "Press Enter to exit..."
-exit
