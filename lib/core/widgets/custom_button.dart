@@ -183,9 +183,10 @@ class _CustomButtonState extends State<CustomButton>
   }
 
   void _onHover(bool hover) {
-    if (hover)
+    if (hover) {
       _controller.forward();
-    else
+    } else {
       _controller.reverse();
+    }
   }
 }
