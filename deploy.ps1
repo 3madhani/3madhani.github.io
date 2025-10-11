@@ -21,6 +21,12 @@ else {
 
 Write-Host "`n🌐 Deploying to GitHub Pages..." -ForegroundColor Cyan
 
+# Inject cache-busting version into index.html
+$timestamp = Get-Date -Format "yyyyMMddHHmmss"
+(Get-Content build/web/index.html) -replace '</head>', "<meta name='build-version' content='$timestamp'></head>" | Set-Content build/web/index.html
+Write-Host "🧩 Added cache-busting version: $timestamp" -ForegroundColor Cyan
+
+
 # Split and deploy build/web to gh-pages
 git subtree split --prefix build/web -b gh-pages-temp
 git push origin gh-pages-temp:gh-pages --force
