@@ -3,127 +3,102 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class Particle {
-  final double x;
-  final double y;
-  final double size;
-  final double speedX;
-  final double speedY;
-  final double opacity;
-
-  const Particle({
-    required this.x,
-    required this.y,
-    required this.size,
-    required this.speedX,
-    required this.speedY,
-    required this.opacity,
-  });
+  double x, y, size, speedX, speedY, opacity;
+  Particle(this.x, this.y, this.size, this.speedX, this.speedY, this.opacity);
 
   factory Particle.random() {
-    final random = math.Random();
+    final rand = math.Random();
     return Particle(
-      x: random.nextDouble(),
-      y: random.nextDouble(),
-      size: random.nextDouble() * 4 + 1,
-      speedX: (random.nextDouble() - 0.5) * 0.02,
-      speedY: (random.nextDouble() - 0.5) * 0.02,
-      opacity: random.nextDouble() * 0.5 + 0.1,
+      rand.nextDouble(),
+      rand.nextDouble(),
+      rand.nextDouble() * 3 + 2,
+      (rand.nextDouble() - 0.5) * 0.0005,
+      (rand.nextDouble() - 0.5) * 0.0005,
+      rand.nextDouble() * 0.5 + 0.2,
     );
   }
 
-  Particle update(double t) {
-    return Particle(
-      x: (x + speedX * t) % 1,
-      y: (y + speedY * t) % 1,
-      size: size,
-      speedX: speedX,
-      speedY: speedY,
-      opacity: opacity,
-    );
+  void move(Duration delta) {
+    final dt = delta.inMilliseconds;
+    x = (x + speedX * dt) % 1;
+    y = (y + speedY * dt) % 1;
+    if (x < 0) x += 1;
+    if (y < 0) y += 1;
   }
 }
 
 class ParticlePainter extends CustomPainter {
   final List<Particle> particles;
-  final Animation<double> animation;
   final Color color;
 
-  ParticlePainter({
-    required this.particles,
-    required this.animation,
-    required this.color,
-  });
+  ParticlePainter(this.particles, this.color);
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
-
-    for (final particle in particles) {
-      final p = particle.update(animation.value);
+    for (final p in particles) {
       paint.color = color.withOpacity(p.opacity);
-      final dx = p.x * size.width;
-      final dy = p.y * size.height;
-      canvas.drawCircle(Offset(dx, dy), p.size, paint);
+      canvas.drawCircle(
+        Offset(p.x * size.width, p.y * size.height),
+        p.size,
+        paint,
+      );
     }
   }
 
   @override
-  bool shouldRepaint(covariant ParticlePainter old) =>
-      old.animation.value != animation.value;
+  bool shouldRepaint(covariant ParticlePainter old) => true;
 }
 
 class ParticleSystem extends StatefulWidget {
-  /// Number of particles to display
   final int particleCount;
-
-  /// Particle color (optional)
   final Color? color;
 
-  const ParticleSystem({super.key, this.particleCount = 50, this.color});
+  const ParticleSystem({super.key, this.particleCount = 9, this.color});
 
   @override
   State<ParticleSystem> createState() => _ParticleSystemState();
 }
 
 class _ParticleSystemState extends State<ParticleSystem>
-    with TickerProviderStateMixin {
-  late final AnimationController _controller;
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
   late final List<Particle> _particles;
+  late Duration _lastTime;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final particleColor =
-        widget.color ?? theme.colorScheme.primary.withOpacity(0.1);
-
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return CustomPaint(
-          painter: ParticlePainter(
-            particles: _particles,
-            animation: _controller,
-            color: particleColor,
-          ),
-          size: Size.infinite,
-        );
-      },
+    final color = widget.color ?? theme.colorScheme.primary.withOpacity(0.15);
+    return CustomPaint(
+      painter: ParticlePainter(_particles, color),
+      child: const SizedBox.expand(),
     );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _ctrl.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 10),
-      vsync: this,
-    )..repeat();
     _particles = List.generate(widget.particleCount, (_) => Particle.random());
+    _lastTime = Duration.zero;
+    _ctrl = AnimationController(vsync: this, duration: const Duration(days: 1))
+      ..addListener(_onTick)
+      ..forward();
+  }
+
+  void _onTick() {
+    final now = _ctrl.lastElapsedDuration ?? Duration.zero;
+    final delta = now - _lastTime;
+    _lastTime = now;
+    for (final p in _particles) {
+      p.move(delta);
+    }
+    setState(() {}); // triggers repaint
   }
 }

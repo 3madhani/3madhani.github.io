@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:test_app/core/widgets/floating_shapes.dart';
 
 import '../../../../../core/utils/responsive_grid_delegate.dart';
-import '../../../../../core/widgets/custom_button.dart';
 import '../../../../../core/widgets/magnetic_button.dart';
 import '../../../../../core/widgets/section_wrapper.dart';
 import '../../../domain/entities/skill.dart';
@@ -48,7 +47,8 @@ class _SkillsSectionState extends State<SkillsSection>
             children: [
               // Category filters
               RevealAnimation(
-                duration: const Duration(milliseconds: 200),
+                delay: const Duration(milliseconds: 300),
+                duration: const Duration(seconds: 1),
                 offset: const Offset(0, 30),
                 child: Wrap(
                   alignment: WrapAlignment.center,
@@ -134,16 +134,6 @@ class _SkillsSectionState extends State<SkillsSection>
                   },
                 ),
               ),
-
-              const SizedBox(height: 40),
-
-              // Load all button
-              CustomButton(
-                text: 'Load All Skills',
-                icon: Icons.expand,
-                onPressed: _loadAll,
-                type: CustomButtonType.magical,
-              ),
             ],
           ),
         ),
@@ -168,12 +158,5 @@ class _SkillsSectionState extends State<SkillsSection>
 
   String _catName(SkillCategory c) {
     return c.name[0].toUpperCase() + c.name.substring(1);
-  }
-
-  void _loadAll() {
-    setState(() => _selectedCategory = null);
-    _animController
-      ..reset()
-      ..forward();
   }
 }

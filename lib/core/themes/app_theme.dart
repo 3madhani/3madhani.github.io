@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Default seed color
@@ -13,13 +14,14 @@ class AppTheme {
   static const Curve standardEasing = Curves.easeInOut;
   static const Curve emphasizedEasing = Curves.easeOutCubic;
 
-  static ThemeData lightTheme([Color? seedColor]) {
+  static ThemeData darkTheme([Color? seedColor]) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor ?? _defaultSeedColor,
-      brightness: Brightness.light,
+      brightness: Brightness.dark,
     );
 
     return ThemeData(
+      fontFamily: GoogleFonts.concertOne().fontFamily,
       useMaterial3: true,
       colorScheme: colorScheme,
       appBarTheme: AppBarTheme(
@@ -52,7 +54,7 @@ class AppTheme {
         }),
       ),
       cardTheme: CardThemeData(
-        elevation: 2,
+        elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         color: colorScheme.surface,
       ),
@@ -96,13 +98,14 @@ class AppTheme {
     );
   }
 
-  static ThemeData darkTheme([Color? seedColor]) {
+  static ThemeData lightTheme([Color? seedColor]) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seedColor ?? _defaultSeedColor,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
     );
 
     return ThemeData(
+      fontFamily: GoogleFonts.concertOne().fontFamily,
       useMaterial3: true,
       colorScheme: colorScheme,
       appBarTheme: AppBarTheme(
@@ -135,7 +138,7 @@ class AppTheme {
         }),
       ),
       cardTheme: CardThemeData(
-        elevation: 8,
+        elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         color: colorScheme.surface,
       ),

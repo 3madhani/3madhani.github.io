@@ -27,7 +27,7 @@ class _FloatingElementsState extends State<FloatingElements>
   final List<IconData> _icons = [
     Icons.flutter_dash,
     Icons.code,
-    Icons.phone_android,
+    Icons.local_fire_department,
     Icons.web,
   ];
 
@@ -36,8 +36,8 @@ class _FloatingElementsState extends State<FloatingElements>
     final theme = Theme.of(context);
 
     return SizedBox(
-      width: 400,
-      height: 400,
+      width: _controllers.length * 120,
+      height: _controllers.length * 120,
       child: Stack(
         children: _icons.asMap().entries.map((entry) {
           final index = entry.key;
@@ -52,8 +52,8 @@ class _FloatingElementsState extends State<FloatingElements>
               final y = math.sin(angle) * radius + 200;
 
               return Positioned(
-                left: x - 40,
-                top: y - 40,
+                left: x,
+                top: y,
                 child: FloatingElement(
                   icon: icon,
                   color: theme.colorScheme.primary,
@@ -159,9 +159,8 @@ class _FloatingElementState extends State<FloatingElement>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.2,
-    ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOut));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(parent: _hoverController, curve: Curves.easeInOut),
+    );
   }
 }

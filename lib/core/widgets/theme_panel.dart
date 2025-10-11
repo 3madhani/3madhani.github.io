@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../feature/portfolio/presentation/bloc/theme_cubit/theme_cubit.dart';
 import '../../feature/portfolio/presentation/bloc/theme_cubit/theme_state.dart';
@@ -203,8 +204,8 @@ class _ThemePanelState extends State<ThemePanel>
                           _ThemeOption(
                             name: 'Neon',
                             colors: [
-                              const Color(0xFFE91E63),
-                              const Color(0xFF00E5FF),
+                              const Color.fromARGB(255, 231, 3, 79),
+                              const Color.fromARGB(255, 2, 210, 233),
                             ],
                             onTap: () => _selectTheme(const Color(0xFFE91E63)),
                           ),
@@ -307,7 +308,13 @@ class _ThemePanelState extends State<ThemePanel>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Pick a Color'),
-        content: const Text('Color picker implementation here'),
+        content: ColorPicker(
+          pickerColor: context.read<ThemeCubit>().state.seedColor,
+          onColorChanged: (color) {
+            context.read<ThemeCubit>().updateSeedColor(color);
+          },
+          paletteType: PaletteType.hsv,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

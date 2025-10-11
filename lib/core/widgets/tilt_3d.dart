@@ -8,7 +8,7 @@ class Tilt3D extends StatefulWidget {
   const Tilt3D({
     super.key,
     required this.child,
-    this.maxTilt = 12,
+    this.maxTilt = 30,
     this.perspective = 0.0015,
   });
 
@@ -19,9 +19,11 @@ class Tilt3D extends StatefulWidget {
 class _Tilt3DState extends State<Tilt3D> {
   double _dx = 0;
   double _dy = 0;
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return MouseRegion(
       onHover: (event) {
         final box = context.findRenderObject() as RenderBox?;
@@ -35,10 +37,12 @@ class _Tilt3DState extends State<Tilt3D> {
             _dy = (normX) * widget.maxTilt;
           });
         }
+        setState(() => _isHovered = true);
       },
       onExit: (_) => setState(() {
         _dx = 0;
         _dy = 0;
+        _isHovered = false;
       }),
       child: Transform(
         alignment: Alignment.center,
@@ -46,7 +50,22 @@ class _Tilt3DState extends State<Tilt3D> {
           ..setEntry(3, 2, widget.perspective)
           ..rotateX(_dx * 3.14159 / 180)
           ..rotateY(_dy * 3.14159 / 180),
-        child: widget.child,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withOpacity(
+                  _isHovered ? 0.6 : 0.4,
+                ),
+                blurRadius: _isHovered ? 20 : 10,
+                spreadRadius: _isHovered ? 2 : 0,
+              ),
+            ],
+          ),
+          child: widget.child,
+        ),
       ),
     );
   }

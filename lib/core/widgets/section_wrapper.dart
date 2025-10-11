@@ -51,7 +51,6 @@ class SectionWrapper extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-
                 if (subtitle != null) ...[
                   const SizedBox(height: 16),
                   Text(
@@ -64,24 +63,24 @@ class SectionWrapper extends StatelessWidget {
                 ],
               ],
             ),
-
             const SizedBox(height: 48),
           ],
-
           // Section Content
           child,
         ],
       ),
     );
 
+    final contentWithScroll = SingleChildScrollView(child: sectionContent);
+
     if (enableRevealAnimation) {
       return RevealAnimation(
         duration: const Duration(milliseconds: 800),
         offset: const Offset(0, 50),
-        child: sectionContent,
+        child: contentWithScroll,
       );
     }
 
-    return sectionContent;
+    return contentWithScroll;
   }
 }

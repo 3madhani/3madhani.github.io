@@ -46,7 +46,8 @@ class MyApp extends StatelessWidget {
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {
           return MaterialApp(
-            title: 'Flutter Magician Portfolio',
+            
+            title: 'Emad Hany | Portfolio',
             debugShowCheckedModeBanner: false,
             themeMode: themeState.themeMode,
             theme: AppTheme.lightTheme(themeState.seedColor),

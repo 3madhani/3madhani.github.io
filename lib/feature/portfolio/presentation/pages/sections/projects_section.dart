@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_app/core/widgets/floating_shapes.dart';
+import 'package:test_app/core/widgets/tilt_3d.dart';
 
 import '../../../../../core/utils/responsive_helper.dart';
-import '../../../../../core/widgets/custom_button.dart';
 import '../../../../../core/widgets/magnetic_button.dart';
 import '../../../../../core/widgets/section_wrapper.dart';
 import '../../../domain/entities/project.dart';
@@ -40,15 +40,17 @@ class ProjectsSection extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Theme.of(context).colorScheme.surface,
               Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+              Theme.of(context).colorScheme.surface.withOpacity(0.1),
             ],
           ),
           child: Column(
             children: [
               // Filter Buttons
               RevealAnimation(
-                duration: const Duration(milliseconds: 200),
+                delay: const Duration(milliseconds: 300),
+                duration: const Duration(seconds: 1),
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 600),
                   child: Wrap(
@@ -110,10 +112,12 @@ class ProjectsSection extends StatelessWidget {
                                   offset: Offset(0, (1 - value) * 50),
                                   child: Opacity(
                                     opacity: value,
-                                    child: ProjectCard(
-                                      project: project,
-                                      onTap: () =>
-                                          _showProjectModal(context, project),
+                                    child: Tilt3D(
+                                      child: ProjectCard(
+                                        project: project,
+                                        onTap: () =>
+                                            _showProjectModal(context, project),
+                                      ),
                                     ),
                                   ),
                                 );
@@ -122,13 +126,6 @@ class ProjectsSection extends StatelessWidget {
                           },
                         ),
                       ),
-              ),
-              const SizedBox(height: 40),
-              CustomButton(
-                text: 'View All Projects',
-                icon: Icons.launch,
-                onPressed: () {},
-                type: CustomButtonType.magical,
               ),
             ],
           ),

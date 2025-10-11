@@ -7,66 +7,47 @@ import 'package:flutter/material.dart';
 class LoadingScreen extends StatefulWidget {
   final VoidCallback onComplete;
   const LoadingScreen({super.key, required this.onComplete});
+
   @override
   State<LoadingScreen> createState() => _LoadingScreenState();
-}
-
-class ParticleRingPainter extends CustomPainter {
-  final Animation<double> animation;
-  final Color color;
-  ParticleRingPainter({required this.animation, required this.color})
-    : super(repaint: animation);
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
-    final radius = size.width * 0.39;
-    final paint = Paint()..color = color.withOpacity(0.18);
-    for (int i = 0; i < 16; i++) {
-      final angle = (i / 16) * 2 * math.pi + animation.value * 2 * math.pi;
-      double dx = center.dx + math.cos(angle) * radius;
-      double dy = center.dy + math.sin(angle) * radius;
-      canvas.drawCircle(
-        Offset(dx, dy),
-        3 + 1.2 * math.sin(animation.value * 2 * math.pi + i),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant ParticleRingPainter oldDelegate) =>
-      oldDelegate.animation.value != animation.value;
 }
 
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
   const _InfoChip({required this.icon, required this.label});
+
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Icon(icon, size: 19, color: Theme.of(context).colorScheme.primary),
-      const SizedBox(height: 3),
-      Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 20, color: theme.colorScheme.primary),
+        const SizedBox(height: 3),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.labelSmall?.copyWith(
+            fontSize: 12,
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
+          ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }
 
 class _LoadingScreenState extends State<LoadingScreen>
     with TickerProviderStateMixin {
-  late AnimationController _logoController;
-  late AnimationController _progressController;
-  late Animation<double> _logoPulse;
-  late Animation<double> _progressBar;
-  late Animation<double> _halo;
-  int _curMsgIdx = 0;
+  late final AnimationController _logoController;
+  late final AnimationController _progressController;
+  late final Animation<double> _logoPulse;
+  late final Animation<double> _progressBar;
+  late final Animation<double> _halo;
 
-  String _deviceType = 'Unknown';
+  int _curMsgIdx = 0;
+  String _deviceType = '...';
   String _screenSize = '...';
   String _performance = '✨';
 
@@ -82,172 +63,158 @@ class _LoadingScreenState extends State<LoadingScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 600;
+
+    final logoSize = isMobile ? 72.0 : 100.0;
+    final progressWidth = math.min(size.width * 0.7, 340.0);
+
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: AnimatedBuilder(
         animation: _halo,
-        builder: (_, __) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32.0,
-                vertical: 8,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Magical Halo
-                      AnimatedBuilder(
-                        animation: _halo,
-                        builder: (_, __) {
-                          return Container(
-                            width: 140 * _halo.value,
-                            height: 140 * _halo.value,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: theme.colorScheme.primary.withOpacity(
-                                    0.18,
-                                  ),
-                                  blurRadius: 32,
-                                  spreadRadius: 5 * _halo.value,
-                                ),
+        builder: (_, __) => Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 20 : 40,
+              vertical: 12,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Animated Halo & Logo
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AnimatedBuilder(
+                      animation: _halo,
+                      builder: (_, __) => Container(
+                        width: logoSize * _halo.value * 1.8,
+                        height: logoSize * _halo.value * 1.8,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.colorScheme.primary.withOpacity(
+                                0.18,
+                              ),
+                              blurRadius: 36,
+                              spreadRadius: 6 * _halo.value,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: logoSize * 1.5,
+                      height: logoSize * 1.5,
+                      child: CustomPaint(
+                        painter: _ParticleRingPainter(
+                          animation: _logoController,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    ScaleTransition(
+                      scale: _logoPulse,
+                      child: Container(
+                        width: logoSize,
+                        height: logoSize,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: theme.colorScheme.primary,
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.colorScheme.primary.withOpacity(
+                                0.35,
+                              ),
+                              blurRadius: 22,
+                              spreadRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.flutter_dash,
+                          color: theme.colorScheme.onPrimary,
+                          size: logoSize * 0.6,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: isMobile ? 28 : 36),
+
+                // Animated Loading Message
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 600),
+                  child: Text(
+                    _loadingMessages[_curMsgIdx],
+                    key: ValueKey(_curMsgIdx),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: isMobile ? 18 : 22,
+                      color: theme.colorScheme.primary,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 10,
+                          color: theme.colorScheme.primary.withOpacity(0.25),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Progress bar
+                Container(
+                  width: progressWidth,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: theme.colorScheme.surfaceContainerHighest,
+                  ),
+                  child: AnimatedBuilder(
+                    animation: _progressBar,
+                    builder: (_, __) => Stack(
+                      children: [
+                        Container(
+                          width: progressWidth * _progressBar.value,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            gradient: LinearGradient(
+                              colors: [
+                                theme.colorScheme.primary,
+                                theme.colorScheme.secondary.withOpacity(0.8),
                               ],
                             ),
-                          );
-                        },
-                      ),
-                      // Particle ring
-                      SizedBox(
-                        width: 120,
-                        height: 120,
-                        child: CustomPaint(
-                          painter: ParticleRingPainter(
-                            animation: _logoController,
-                            color: theme.colorScheme.primary,
                           ),
                         ),
-                      ),
-                      // Flutter logo with pulse
-                      ScaleTransition(
-                        scale: _logoPulse,
-                        child: Container(
-                          width: 78,
-                          height: 78,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: theme.colorScheme.primary,
-                            boxShadow: [
-                              BoxShadow(
-                                color: theme.colorScheme.primary.withOpacity(
-                                  0.3,
-                                ),
-                                blurRadius: 20,
-                                spreadRadius: 3,
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.flutter_dash,
-                            color: theme.colorScheme.onPrimary,
-                            size: 48,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                  // Magical loading message
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 550),
-                    child: Text(
-                      _loadingMessages[_curMsgIdx],
-                      key: ValueKey(_curMsgIdx),
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        letterSpacing: 1.2,
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w700,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 8,
-                            color: theme.colorScheme.primary.withOpacity(0.25),
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  // Magical Progress Bar
-                  Container(
-                    width: 330,
-                    height: 9,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4.5),
-                      color: theme.colorScheme.surfaceContainerHighest,
-                    ),
-                    child: AnimatedBuilder(
-                      animation: _progressBar,
-                      builder: (context, _) => Stack(
-                        children: [
-                          Container(
-                            width: 330 * _progressBar.value,
-                            height: 9,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.5),
-                              gradient: LinearGradient(
-                                colors: [
-                                  theme.colorScheme.primary,
-                                  theme.colorScheme.secondary.withOpacity(0.8),
-                                ],
-                              ),
-                            ),
-                          ),
-                          if (_progressBar.value > 0)
-                            Positioned(
-                              left: 330 * _progressBar.value - 28,
-                              child: Container(
-                                width: 28,
-                                height: 9,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4.5),
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.transparent,
-                                      Colors.white.withOpacity(0.18),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 26),
-                  // Device/about info
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _InfoChip(icon: Icons.devices, label: _deviceType),
-                      const SizedBox(width: 20),
-                      _InfoChip(icon: Icons.aspect_ratio, label: _screenSize),
-                      const SizedBox(width: 20),
-                      _InfoChip(icon: Icons.auto_awesome, label: _performance),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              ),
+                ),
+
+                SizedBox(height: isMobile ? 24 : 32),
+
+                // Device Info
+                Wrap(
+                  spacing: 24,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    _InfoChip(icon: Icons.devices, label: _deviceType),
+                    _InfoChip(icon: Icons.aspect_ratio, label: _screenSize),
+                    _InfoChip(icon: Icons.auto_awesome, label: _performance),
+                  ],
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -273,7 +240,7 @@ class _LoadingScreenState extends State<LoadingScreen>
 
     _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4),
+      duration: const Duration(seconds: 5),
     );
     _progressBar = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -289,37 +256,32 @@ class _LoadingScreenState extends State<LoadingScreen>
     _startTextCycle();
     _progressController.forward();
 
-    // End loading after animation completes
     _progressController.addStatusListener((status) {
       if (status == AnimationStatus.completed) widget.onComplete();
     });
   }
 
   Future<void> _detectDevice() async {
-    final DeviceInfoPlugin info = DeviceInfoPlugin();
+    final info = DeviceInfoPlugin();
     try {
       final web = await info.webBrowserInfo;
       setState(() {
-        _deviceType = '${web.browserName} Browser';
+        _deviceType = web.browserName.name;
         _screenSize =
             '${MediaQuery.of(context).size.width.toInt()}×${MediaQuery.of(context).size.height.toInt()}';
-        _performance =
-            web.hardwareConcurrency != null && web.hardwareConcurrency! > 4
-            ? '✨✨✨'
-            : '✨✨';
+        _performance = (web.hardwareConcurrency ?? 2) > 4 ? '✨✨✨' : '✨✨';
       });
-    } catch (e) {
+    } catch (_) {
       setState(() {
-        _deviceType = 'Native App';
+        _deviceType = 'Native';
         _screenSize =
             '${MediaQuery.of(context).size.width.toInt()}×${MediaQuery.of(context).size.height.toInt()}';
-        _performance = '✨✨';
       });
     }
   }
 
   void _startTextCycle() {
-    Timer.periodic(const Duration(milliseconds: 700), (timer) {
+    Timer.periodic(const Duration(milliseconds: 850), (timer) {
       if (_curMsgIdx < _loadingMessages.length - 1) {
         setState(() => _curMsgIdx++);
       } else {
@@ -327,4 +289,32 @@ class _LoadingScreenState extends State<LoadingScreen>
       }
     });
   }
+}
+
+// Particle Ring Painter (smoother + optimized)
+class _ParticleRingPainter extends CustomPainter {
+  final Animation<double> animation;
+  final Color color;
+  _ParticleRingPainter({required this.animation, required this.color})
+    : super(repaint: animation);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = size.width * 0.38;
+    final paint = Paint()..color = color.withOpacity(0.2);
+    for (int i = 0; i < 16; i++) {
+      final angle = (i / 16) * 2 * math.pi + animation.value * 2 * math.pi;
+      final dx = center.dx + math.cos(angle) * radius;
+      final dy = center.dy + math.sin(angle) * radius;
+      canvas.drawCircle(
+        Offset(dx, dy),
+        3 + 1.2 * math.sin(animation.value * 2 * math.pi + i),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ParticleRingPainter oldDelegate) => true;
 }

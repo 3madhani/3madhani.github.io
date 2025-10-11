@@ -1,5 +1,3 @@
-// lib/features/portfolio/presentation/pages/home_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -116,18 +114,15 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
                 if (state is PortfolioLoaded) {
-                  return Stack(
-                    children: [
-                      _buildMainContent(state, isMobile, isTablet),
-                      if (isDesktop)
-                        ScrollToTopButton(scrollController: _scrollController),
-                      if (isDesktop) const PerformanceMonitor(),
-                    ],
-                  );
+                  return _buildMainContent(state, isMobile, isTablet);
                 }
                 return const SizedBox.shrink();
               },
             ),
+
+            if (isDesktop)
+              ScrollToTopButton(scrollController: _scrollController),
+            if (isDesktop) const PerformanceMonitor(),
 
             // Theme panel overlay
             ThemePanel(
@@ -178,7 +173,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     context.read<PortfolioBloc>().add(const LoadPortfolioData());
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
         setState(() => _showLoading = false);
       }

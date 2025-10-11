@@ -115,7 +115,10 @@ class _CodeWindowState extends State<CodeWindow>
                   const SizedBox(width: 8),
                   _WindowButton(color: Colors.green.shade400),
                   const SizedBox(width: 16),
-                  Text('magical_app.dart', style: theme.textTheme.titleSmall),
+                  Text(
+                    'emad_hany_portfolio.dart',
+                    style: theme.textTheme.titleSmall,
+                  ),
                 ],
               ),
             ),
@@ -168,7 +171,7 @@ class _CodeWindowState extends State<CodeWindow>
     _controller = AnimationController(
       duration: Duration(milliseconds: _codeLines.length * 500),
       vsync: this,
-    );
+    )..repeat(reverse: true);
     _controller.forward();
   }
 }
