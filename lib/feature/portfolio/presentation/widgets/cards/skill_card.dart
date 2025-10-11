@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/widgets/glass_container.dart';
 import '../../../domain/entities/skill.dart';
 
 class SkillCard extends StatefulWidget {
@@ -13,11 +14,9 @@ class SkillCard extends StatefulWidget {
 
 class _SkillCardState extends State<SkillCard>
     with SingleTickerProviderStateMixin {
-  late AnimationController _hoverController;
-  late Animation<double> _elevationAnimation;
-  late Animation<double> _progressAnimation;
-
-  bool _isHovered = false;
+  late final AnimationController _hoverController;
+  late final Animation<double> _elevationAnim;
+  late final Animation<double> _progressAnim;
 
   @override
   Widget build(BuildContext context) {
@@ -29,98 +28,90 @@ class _SkillCardState extends State<SkillCard>
       child: AnimatedBuilder(
         animation: _hoverController,
         builder: (context, child) {
-          return Card(
-            elevation: _elevationAnimation.value,
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                    theme.colorScheme.surfaceContainerHighest.withOpacity(0.1),
-                  ],
-                ),
-              ),
+          return Transform.scale(
+            scale: 1 + (_elevationAnim.value - 2) * 0.01,
+            child: child,
+          );
+        },
+        child: GlassContainer(
+          blur: 12,
+          opacity: 0.08,
+          borderRadius: BorderRadius.circular(16),
+          padding: const EdgeInsets.all(0),
+          child: Card(
+            elevation: _elevationAnim.value,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Skill Icon
+                  // Icon
                   Container(
-                    width: 60,
-                    height: 60,
+                    width: 56,
+                    height: 56,
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
-                      _getIconData(widget.skill.icon),
+                      _iconFor(widget.skill.icon),
                       size: 32,
                       color: theme.colorScheme.onPrimaryContainer,
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Skill Name
+                  // Name
                   Text(
                     widget.skill.name,
-                    style: theme.textTheme.titleLarge?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
-
-                  // Progress Bar
-                  Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  const SizedBox(height: 12),
+                  // Progress
+                  AnimatedBuilder(
+                    animation: _hoverController,
+                    builder: (context, _) {
+                      return Column(
                         children: [
-                          Text('Proficiency', style: theme.textTheme.bodySmall),
-                          Text(
-                            '${widget.skill.level}%',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Proficiency',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              Text(
+                                '${widget.skill.level}%',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: _progressAnim.value,
+                              minHeight: 8,
+                              backgroundColor:
+                                  theme.colorScheme.surfaceContainerHighest,
+                              valueColor: AlwaysStoppedAnimation(
+                                theme.colorScheme.primary,
+                              ),
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: AnimatedBuilder(
-                          animation: _progressAnimation,
-                          builder: (context, child) {
-                            return FractionallySizedBox(
-                              alignment: Alignment.centerLeft,
-                              widthFactor: _progressAnimation.value,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      theme.colorScheme.primary,
-                                      theme.colorScheme.secondary,
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
-
-                  // Category Badge
+                  // Category badge
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -131,9 +122,8 @@ class _SkillCardState extends State<SkillCard>
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      _getCategoryName(widget.skill.category),
+                      _categoryName(widget.skill.category),
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onTertiaryContainer,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -141,8 +131,8 @@ class _SkillCardState extends State<SkillCard>
                 ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -157,42 +147,28 @@ class _SkillCardState extends State<SkillCard>
   void initState() {
     super.initState();
     _hoverController = AnimationController(
-      duration: const Duration(milliseconds: 200),
       vsync: this,
+      duration: const Duration(milliseconds: 200),
     );
 
-    _elevationAnimation = Tween<double>(
-      begin: 2.0,
-      end: 8.0,
+    _elevationAnim = Tween<double>(
+      begin: 2,
+      end: 10,
     ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOut));
-
-    _progressAnimation = Tween<double>(
+    _progressAnim = Tween<double>(
       begin: 0.0,
       end: widget.skill.level / 100,
     ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOut));
 
     // Animate progress on hover
-    _hoverController.forward();
   }
 
-  String _getCategoryName(SkillCategory category) {
-    switch (category) {
-      case SkillCategory.frontend:
-        return 'Frontend';
-      case SkillCategory.backend:
-        return 'Backend';
-      case SkillCategory.mobile:
-        return 'Mobile';
-      case SkillCategory.tools:
-        return 'Tools';
-      case SkillCategory.design:
-        return 'Design';
-    }
+  String _categoryName(SkillCategory c) {
+    return c.name[0].toUpperCase() + c.name.substring(1);
   }
 
-  IconData _getIconData(String iconString) {
-    // Map icon strings to IconData
-    switch (iconString) {
+  IconData _iconFor(String icon) {
+    switch (icon) {
       case 'fab fa-flutter':
         return Icons.flutter_dash;
       case 'fas fa-code':
@@ -214,12 +190,8 @@ class _SkillCardState extends State<SkillCard>
     }
   }
 
-  void _onHover(bool hovered) {
-    setState(() {
-      _isHovered = hovered;
-    });
-
-    if (hovered) {
+  void _onHover(bool hover) {
+    if (hover) {
       _hoverController.forward();
     } else {
       _hoverController.reverse();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_app/core/widgets/animated_text.dart';
+import 'package:test_app/core/widgets/custom_button.dart';
 
 import '../../bloc/theme_cubit/theme_cubit.dart';
 import '../../bloc/theme_cubit/theme_state.dart';
@@ -9,8 +10,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int currentIndex;
   final Function(int) onSectionTapped;
   final List<String> sectionTitles;
+  final void Function()? onPressed;
 
   const CustomAppBar({
+    this.onPressed,
     super.key,
     required this.currentIndex,
     required this.onSectionTapped,
@@ -31,7 +34,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           Icon(Icons.flutter_dash, color: theme.colorScheme.primary, size: 32),
           const SizedBox(width: 12),
-          AnimatedText(text: 'Portfolio', type: AnimationTextType.typewriter),
+          AnimatedText(text: 'Portfolio', type: AnimationTextType.glitch),
         ],
       ),
       actions: [
@@ -62,6 +65,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             );
           },
         ),
+
+        CustomButton(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          text: "Color Theme",
+          onPressed: onPressed,
+          type: CustomButtonType.ghost,
+          icon: Icons.color_lens_rounded,
+        ),
+        SizedBox(width: 10),
       ],
     );
   }

@@ -7,7 +7,7 @@ class SectionWrapper extends StatelessWidget {
   final String? title;
   final String? subtitle;
   final Widget child;
-  final Color? backgroundColor;
+  final LinearGradient? backgroundColor;
   final EdgeInsets? padding;
   final bool enableRevealAnimation;
   final Duration? animationDelay;
@@ -30,7 +30,7 @@ class SectionWrapper extends StatelessWidget {
 
     final sectionContent = Container(
       width: double.infinity,
-      color: backgroundColor,
+      decoration: BoxDecoration(gradient: backgroundColor),
       padding:
           padding ??
           ResponsiveHelper.getScreenPadding(

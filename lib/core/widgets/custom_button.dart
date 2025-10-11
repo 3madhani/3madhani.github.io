@@ -1,3 +1,5 @@
+// lib/core/widgets/custom_button.dart
+
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatefulWidget {
@@ -28,45 +30,26 @@ enum CustomButtonType { primary, secondary, outline, ghost, magical }
 
 class _CustomButtonState extends State<CustomButton>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _glowAnimation;
-
-  bool _isHovered = false;
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnim;
+  late final Animation<double> _glowAnim;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final padding =
+        widget.padding ??
+        const EdgeInsets.symmetric(horizontal: 24, vertical: 16);
 
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) {
-        return MouseRegion(
-          onEnter: (_) => _onHover(true),
-          onExit: (_) => _onHover(false),
-          child: Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Container(
-              width: widget.fullWidth ? double.infinity : null,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: widget.type == CustomButtonType.magical
-                    ? [
-                        BoxShadow(
-                          color: theme.colorScheme.primary.withOpacity(
-                            0.3 * _glowAnimation.value,
-                          ),
-                          blurRadius: 20 * _glowAnimation.value,
-                          spreadRadius: 2 * _glowAnimation.value,
-                        ),
-                      ]
-                    : null,
-              ),
-              child: _buildButton(context, theme),
-            ),
-          ),
-        );
-      },
+      builder: (_, child) =>
+          Transform.scale(scale: _scaleAnim.value, child: child),
+      child: MouseRegion(
+        onEnter: (_) => _onHover(true),
+        onExit: (_) => _onHover(false),
+        child: _buildButton(theme, padding),
+      ),
     );
   }
 
@@ -79,61 +62,65 @@ class _CustomButtonState extends State<CustomButton>
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
       vsync: this,
+      duration: const Duration(milliseconds: 200),
     );
-
-    _scaleAnimation = Tween<double>(
+    _scaleAnim = Tween(
       begin: 1.0,
       end: 1.05,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _glowAnimation = Tween<double>(
+    _glowAnim = Tween(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
 
-  Widget _buildButton(BuildContext context, ThemeData theme) {
-    final buttonPadding =
-        widget.padding ??
-        const EdgeInsets.symmetric(horizontal: 24, vertical: 16);
+  Widget _buildButton(ThemeData theme, EdgeInsets padding) {
+    final icon = widget.icon;
+    final isLoading = widget.isLoading;
 
     switch (widget.type) {
       case CustomButtonType.primary:
         return FilledButton.icon(
-          onPressed: widget.isLoading ? null : widget.onPressed,
-          icon: _buildIcon(theme.colorScheme.onPrimary),
-          label: _buildLabel(theme.colorScheme.onPrimary),
-          style: FilledButton.styleFrom(padding: buttonPadding),
+          onPressed: isLoading ? null : widget.onPressed,
+          icon: isLoading
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Icon(icon, color: theme.colorScheme.onPrimary),
+          label: Text(widget.text),
+          style: FilledButton.styleFrom(
+            padding: padding,
+            foregroundColor: theme.colorScheme.onPrimary,
+          ),
         );
-
       case CustomButtonType.secondary:
         return FilledButton.tonalIcon(
-          onPressed: widget.isLoading ? null : widget.onPressed,
-          icon: _buildIcon(theme.colorScheme.onSecondaryContainer),
-          label: _buildLabel(theme.colorScheme.onSecondaryContainer),
-          style: FilledButton.styleFrom(padding: buttonPadding),
+          onPressed: isLoading ? null : widget.onPressed,
+          icon: Icon(icon, color: theme.colorScheme.onSecondaryContainer),
+          label: Text(widget.text),
+          style: FilledButton.styleFrom(
+            padding: padding,
+            foregroundColor: theme.colorScheme.onSecondaryContainer,
+          ),
         );
-
       case CustomButtonType.outline:
         return OutlinedButton.icon(
-          onPressed: widget.isLoading ? null : widget.onPressed,
-          icon: _buildIcon(theme.colorScheme.primary),
-          label: _buildLabel(theme.colorScheme.primary),
-          style: OutlinedButton.styleFrom(padding: buttonPadding),
+          onPressed: isLoading ? null : widget.onPressed,
+          icon: Icon(icon),
+          label: Text(widget.text),
+          style: OutlinedButton.styleFrom(padding: padding),
         );
-
       case CustomButtonType.ghost:
         return TextButton.icon(
-          onPressed: widget.isLoading ? null : widget.onPressed,
-          icon: _buildIcon(theme.colorScheme.primary),
-          label: _buildLabel(theme.colorScheme.primary),
-          style: TextButton.styleFrom(padding: buttonPadding),
+          onPressed: isLoading ? null : widget.onPressed,
+          icon: Icon(icon),
+          label: Text(widget.text),
+          style: TextButton.styleFrom(padding: padding),
         );
-
       case CustomButtonType.magical:
         return Container(
           decoration: BoxDecoration(
@@ -141,23 +128,51 @@ class _CustomButtonState extends State<CustomButton>
               colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
             ),
             borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.primary.withOpacity(
+                  _glowAnim.value * 0.3,
+                ),
+                blurRadius: 20 * _glowAnim.value,
+                spreadRadius: 2 * _glowAnim.value,
+              ),
+            ],
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: widget.isLoading ? null : widget.onPressed,
+              onTap: widget.onPressed,
               borderRadius: BorderRadius.circular(12),
               child: Padding(
-                padding: buttonPadding,
+                padding: padding,
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: widget.fullWidth
+                      ? MainAxisSize.max
+                      : MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (widget.icon != null) ...[
-                      _buildIcon(Colors.white),
+                    if (isLoading)
+                      const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                    else if (icon != null) ...[
+                      Icon(icon, color: Colors.white),
                       const SizedBox(width: 8),
                     ],
-                    _buildLabel(Colors.white),
+                    Text(
+                      widget.text,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -167,41 +182,10 @@ class _CustomButtonState extends State<CustomButton>
     }
   }
 
-  Widget _buildIcon(Color color) {
-    if (widget.isLoading) {
-      return SizedBox(
-        width: 16,
-        height: 16,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(color),
-        ),
-      );
-    }
-
-    if (widget.icon != null) {
-      return Icon(widget.icon, color: color, size: 18);
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  Widget _buildLabel(Color color) {
-    return Text(
-      widget.text,
-      style: TextStyle(color: color, fontWeight: FontWeight.w600),
-    );
-  }
-
-  void _onHover(bool hovered) {
-    setState(() {
-      _isHovered = hovered;
-    });
-
-    if (hovered) {
+  void _onHover(bool hover) {
+    if (hover)
       _controller.forward();
-    } else {
+    else
       _controller.reverse();
-    }
   }
 }

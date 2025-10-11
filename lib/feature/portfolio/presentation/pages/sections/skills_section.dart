@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import '../../../../../core/utils/responsive_helper.dart';
+import 'package:test_app/core/widgets/floating_shapes.dart';
+
+import '../../../../../core/utils/responsive_grid_delegate.dart';
+import '../../../../../core/widgets/custom_button.dart';
+import '../../../../../core/widgets/magnetic_button.dart';
+import '../../../../../core/widgets/section_wrapper.dart';
 import '../../../domain/entities/skill.dart';
+import '../../widgets/animations/reveal_animation.dart';
 import '../../widgets/cards/skill_card.dart';
 
 class SkillsSection extends StatefulWidget {
@@ -15,99 +20,88 @@ class SkillsSection extends StatefulWidget {
 
 class _SkillsSectionState extends State<SkillsSection>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  SkillCategory _selectedCategory = SkillCategory.frontend;
+  late final AnimationController _animController;
+  SkillCategory? _selectedCategory = SkillCategory.frontend;
 
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _animationController.forward();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  List<Skill> get _filteredSkills {
-    return widget.skills
-        .where((skill) => skill.category == _selectedCategory)
-        .toList();
+  List<Skill> get _filtered {
+    if (_selectedCategory == null) return widget.skills;
+    return widget.skills.where((s) => s.category == _selectedCategory).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isMobile = ResponsiveHelper.isMobile(context);
-
-    return Container(
-      width: double.infinity,
-      padding: ResponsiveHelper.getScreenPadding(
-        context,
-      ).copyWith(top: isMobile ? 40 : 80, bottom: isMobile ? 40 : 80),
-      decoration: BoxDecoration(color: theme.colorScheme.surface),
-      child: Column(
-        children: [
-          // Section Header
-          Text(
-            'Technical Magic',
-            style: theme.textTheme.displaySmall?.copyWith(
-              fontSize: ResponsiveHelper.getSectionTitleSize(context),
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
+    return Stack(
+      children: [
+        const Positioned.fill(child: FloatingShapes(shapeCount: 5)),
+        SectionWrapper(
+          backgroundColor: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.1),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Technologies I enchant with',
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.7),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 48),
+          title: 'Technical Magic',
+          subtitle: 'Technologies I enchant with',
+          child: Column(
+            children: [
+              // Category filters
+              RevealAnimation(
+                duration: const Duration(milliseconds: 200),
+                offset: const Offset(0, 30),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    ...SkillCategory.values.map((cat) {
+                      final sel = cat == _selectedCategory;
+                      return MagneticButton(
+                        radius: 80,
+                        onTap: () {
+                          setState(() => _selectedCategory = cat);
+                          _animController
+                            ..reset()
+                            ..forward();
+                        },
+                        child: FilterChip(
+                          label: Text(_catName(cat)),
+                          selected: sel,
+                          onSelected: (_) {},
+                          selectedColor: Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer,
+                        ),
+                      );
+                    }),
+                    // "All" filter
+                    MagneticButton(
+                      radius: 80,
+                      onTap: () {
+                        setState(() => _selectedCategory = null);
+                        _animController
+                          ..reset()
+                          ..forward();
+                      },
+                      child: FilterChip(
+                        label: const Text('All'),
+                        selected: _selectedCategory == null,
+                        onSelected: (_) {},
+                        selectedColor: Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 48),
 
-          // Category Filter
-          Container(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 12,
-              runSpacing: 12,
-              children: SkillCategory.values.map((category) {
-                final isSelected = category == _selectedCategory;
-                return FilterChip(
-                  label: Text(_getCategoryName(category)),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() {
-                        _selectedCategory = category;
-                      });
-                      _animationController.reset();
-                      _animationController.forward();
-                    }
-                  },
-                  backgroundColor: theme.colorScheme.surfaceVariant,
-                  selectedColor: theme.colorScheme.primaryContainer,
-                  checkmarkColor: theme.colorScheme.onPrimaryContainer,
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 48),
-
-          // Skills Grid
-          AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return Container(
-                constraints: const BoxConstraints(maxWidth: 1200),
+              // Skills grid
+              RevealAnimation(
+                duration: const Duration(milliseconds: 400),
+                offset: const Offset(0, 50),
                 child: GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -117,84 +111,69 @@ class _SkillsSectionState extends State<SkillsSection>
                     crossAxisSpacing: 24,
                     mainAxisSpacing: 24,
                   ),
-                  itemCount: _filteredSkills.length,
-                  itemBuilder: (context, index) {
-                    final skill = _filteredSkills[index];
-                    final delay = index * 0.1;
-
+                  itemCount: _filtered.length,
+                  itemBuilder: (context, i) {
+                    final skill = _filtered[i];
+                    final delay = i * 0.1;
                     return AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        final animationValue = Curves.easeOutBack.transform(
-                          (_animationController.value - delay).clamp(0.0, 1.0),
-                        );
+                      animation: _animController,
+                      builder: (ctx, child) {
+                        final v = Curves.easeOutBack
+                            .transform(
+                              (_animController.value - delay).clamp(0.0, 1.0),
+                            )
+                            .clamp(0.0, 1.0);
 
                         return Transform.translate(
-                          offset: Offset(0, (1 - animationValue) * 50),
-                          child: Opacity(
-                            opacity: animationValue,
-                            child: SkillCard(skill: skill),
-                          ),
+                          offset: Offset(0, (1 - v) * 50),
+                          child: Opacity(opacity: v, child: child),
                         );
                       },
+                      child: SkillCard(skill: skill),
                     );
                   },
                 ),
-              );
-            },
+              ),
+
+              const SizedBox(height: 40),
+
+              // Load all button
+              CustomButton(
+                text: 'Load All Skills',
+                icon: Icons.expand,
+                onPressed: _loadAll,
+                type: CustomButtonType.magical,
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-
-  String _getCategoryName(SkillCategory category) {
-    switch (category) {
-      case SkillCategory.frontend:
-        return 'Frontend';
-      case SkillCategory.backend:
-        return 'Backend';
-      case SkillCategory.mobile:
-        return 'Mobile';
-      case SkillCategory.tools:
-        return 'Tools';
-      case SkillCategory.design:
-        return 'Design';
-    }
-  }
-}
-
-class SliverGridDelegateWithResponsiveColumns extends SliverGridDelegate {
-  final BuildContext context;
-  final double minItemWidth;
-  final double crossAxisSpacing;
-  final double mainAxisSpacing;
-
-  const SliverGridDelegateWithResponsiveColumns({
-    required this.context,
-    required this.minItemWidth,
-    this.crossAxisSpacing = 0,
-    this.mainAxisSpacing = 0,
-  });
-
-  @override
-  SliverGridLayout getLayout(SliverConstraints constraints) {
-    final availableWidth = constraints.crossAxisExtent;
-    final crossAxisCount = (availableWidth / minItemWidth).floor().clamp(1, 4);
-    final itemWidth =
-        (availableWidth - (crossAxisSpacing * (crossAxisCount - 1))) /
-        crossAxisCount;
-
-    return SliverGridRegularTileLayout(
-      crossAxisCount: crossAxisCount,
-      mainAxisStride: 200 + mainAxisSpacing,
-      crossAxisStride: itemWidth + crossAxisSpacing,
-      childMainAxisExtent: 200,
-      childCrossAxisExtent: itemWidth,
-      reverseCrossAxis: false,
+        ),
+      ],
     );
   }
 
   @override
-  bool shouldRelayout(covariant SliverGridDelegate oldDelegate) => false;
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..forward();
+  }
+
+  String _catName(SkillCategory c) {
+    return c.name[0].toUpperCase() + c.name.substring(1);
+  }
+
+  void _loadAll() {
+    setState(() => _selectedCategory = null);
+    _animController
+      ..reset()
+      ..forward();
+  }
 }

@@ -65,6 +65,7 @@ class _HomePageState extends State<HomePage> {
         appBar: isMobile
             ? null
             : CustomAppBar(
+                onPressed: () => _toggleThemePanel(),
                 currentIndex: _currentIndex,
                 onSectionTapped: _navigateToSection,
                 sectionTitles: _sectionTitles,
@@ -152,11 +153,16 @@ class _HomePageState extends State<HomePage> {
               )
             : null,
         floatingActionButton: isMobile
-            ? const ThemeSwitcher()
-            : IconButton(
-                icon: Icon(Icons.palette),
-                onPressed: () => setState(() => _themePanelVisible = true),
-              ),
+            ? Column(
+                children: [
+                  const ThemeSwitcher(),
+                  IconButton(
+                    icon: Icon(Icons.palette),
+                    onPressed: () => setState(() => _themePanelVisible = true),
+                  ),
+                ],
+              )
+            : SizedBox.shrink(),
       ),
     );
   }
