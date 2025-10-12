@@ -32,20 +32,46 @@
 
   <!-- Manifest -->
   <link rel="manifest" href="manifest.json">
-<meta name='build-timestamp' content='20251012032157'></head>
+
+  <!-- Force CanvasKit for consistent rendering -->
+  <meta name="flutter-web-renderer" content="canvaskit">
+
+  <!-- ✅ Fix gray background in release mode -->
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #0A0A0A;
+      /* Match your Flutter app's Scaffold background */
+      overflow: hidden;
+    }
+
+    flutter-view,
+    #flutter_host_element {
+      background-color: #0A0A0A !important;
+    }
+  </style>
+<meta name='build-timestamp' content='20251012033627'></head>
 
 <body>
+  <!-- ✅ Auto-update the app when a new service worker is available -->
   <script>
-    // 🔄 Force update if a new version of the service worker is available
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('flutter_service_worker.js?v=2445993586').then((registration) => {
+        navigator.serviceWorker.register('flutter_service_worker.js?v=1765275842').then((registration) => {
           registration.onupdatefound = () => {
             const installingWorker = registration.installing;
             installingWorker.onstatechange = () => {
               if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('⚡ New version detected — refreshing...');
-                window.location.reload(); // 🔁 Auto reload on new version
+                console.log('⚡ New version detected — reloading...');
+                // Unregister old service worker to ensure full cache reset
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                  for (let r of registrations) r.unregister();
+                }).finally(() => {
+                  window.location.reload(true);
+                });
               }
             };
           };
