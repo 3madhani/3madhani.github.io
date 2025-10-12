@@ -36,8 +36,29 @@ if (!window._flutter) {
 }
 _flutter.buildConfig = {"engineRevision":"1e9a811bf8e70466596bcf0ea3a8b5adb5f17f7f","builds":[{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"},{}]};
 
+
 _flutter.loader.load({
-  serviceWorkerSettings: {
-    serviceWorkerVersion: "612149293"
+  onEntrypointLoaded: async (engineInitializer) => {
+    console.log('Entrypoint loaded, initializing engine…');
+    const appRunner = await engineInitializer.initializeEngine();
+    console.log('Engine initialized, running app…');
+    await appRunner.runApp();
+
+    // Auto-reload on new service worker install
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg) {
+          reg.onupdatefound = () => {
+            const newWorker = reg.installing;
+            newWorker.onstatechange = () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('⚡ New version available, reloading…');
+                window.location.reload();
+              }
+            };
+          };
+        }
+      });
+    }
   }
 });
