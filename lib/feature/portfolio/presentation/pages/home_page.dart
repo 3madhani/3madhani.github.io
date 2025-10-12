@@ -189,12 +189,12 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const PerformanceMonitor(),
                         ],
-                        if (_themePanelVisible)
-                          ThemePanel(
-                            isVisible: _themePanelVisible,
-                            onClose: () =>
-                                setState(() => _themePanelVisible = false),
-                          ),
+
+                        ThemePanel(
+                          isVisible: _themePanelVisible,
+                          onClose: () =>
+                              setState(() => _themePanelVisible = false),
+                        ),
                       ],
                     );
                   }

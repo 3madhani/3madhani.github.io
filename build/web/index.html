@@ -8,9 +8,8 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- SEO Meta Tags -->
-  <meta name="description"
-    content="Emad Hany | Flutter Developer Portfolio. Explore my work, projects, and skills in mobile and web development.">
+  <!-- SEO & Social -->
+  <meta name="description" content="Emad Hany | Flutter Developer Portfolio. Explore my work, projects, and skills.">
   <meta name="author" content="Emad Hany">
   <meta property="og:title" content="Emad Hany | Portfolio">
   <meta property="og:description" content="Explore my Flutter projects and mobile app portfolio.">
@@ -18,25 +17,22 @@
   <meta property="og:url" content="https://3madhani.github.io">
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- iOS meta tags & icons -->
+  <!-- iOS & PWA -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Emad Hany Portfolio">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="manifest" href="manifest.json">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="icons/favicon.png" />
 
-  <!-- Title -->
   <title>Emad Hany | Portfolio</title>
 
-  <!-- Manifest -->
-  <link rel="manifest" href="manifest.json">
-
-  <!-- Force CanvasKit for consistent rendering -->
+  <!-- Force CanvasKit -->
   <meta name="flutter-web-renderer" content="canvaskit">
 
-  <!-- ✅ Fix gray background in release mode -->
+  <!-- Background fix -->
   <style>
     html,
     body {
@@ -44,7 +40,6 @@
       padding: 0;
       height: 100%;
       background-color: #0A0A0A;
-      /* Match your Flutter app's Scaffold background */
       overflow: hidden;
     }
 
@@ -53,34 +48,11 @@
       background-color: #0A0A0A !important;
     }
   </style>
-<meta name='build-timestamp' content='20251012034529'></head>
+<meta name='build-timestamp' content='20251012040647'></head>
 
 <body>
-  <!-- ✅ Auto-update the app when a new service worker is available -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('flutter_service_worker.js?v=612149293').then((registration) => {
-          registration.onupdatefound = () => {
-            const installingWorker = registration.installing;
-            installingWorker.onstatechange = () => {
-              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('⚡ New version detected — reloading...');
-                // Unregister old service worker to ensure full cache reset
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                  for (let r of registrations) r.unregister();
-                }).finally(() => {
-                  window.location.reload(true);
-                });
-              }
-            };
-          };
-        }).catch(err => console.error('Service worker registration failed:', err));
-      });
-    }
-  </script>
-
-  <script src="flutter_bootstrap.js" async></script>
+  <!-- Custom bootstrap with auto-update -->
+  <script src="flutter_bootstrap.js" defer></script>
 </body>
 
 </html>
