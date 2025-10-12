@@ -175,10 +175,11 @@ class _HomePageState extends State<HomePage> {
                     ScrollToTopButton(scrollController: _scrollController),
                     const PerformanceMonitor(),
                   ],
-                  ThemePanel(
-                    isVisible: _themePanelVisible,
-                    onClose: () => setState(() => _themePanelVisible = false),
-                  ),
+                  if (_themePanelVisible)
+                    ThemePanel(
+                      isVisible: _themePanelVisible,
+                      onClose: () => setState(() => _themePanelVisible = false),
+                    ),
                 ],
               );
             }
