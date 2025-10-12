@@ -74,117 +74,135 @@ class _HomePageState extends State<HomePage> {
                 ),
               )
             : null,
-        appBar: isMobile
-            ? AppBar(
-                title: const Text('Emad Hany'),
-                leading: Builder(
-                  builder: (ctx) {
-                    return IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => Scaffold.of(ctx).openDrawer(),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              isMobile
+                  ? AppBar(
+                      title: const Text('Emad Hany'),
+                      leading: Builder(
+                        builder: (ctx) {
+                          return IconButton(
+                            icon: const Icon(Icons.menu),
+                            onPressed: () => Scaffold.of(ctx).openDrawer(),
+                          );
+                        },
+                      ),
+                      actions: [
+                        const ThemeSwitcher(),
+                        IconButton(
+                          icon: const Icon(Icons.palette),
+                          onPressed: () =>
+                              setState(() => _themePanelVisible = true),
+                        ),
+                      ],
+                    )
+                  : CustomAppBar(
+                      onPressed: () => setState(
+                        () => _themePanelVisible = !_themePanelVisible,
+                      ),
+                      currentIndex: _currentIndex,
+                      onSectionTapped: _scrollTo,
+                      sectionTitles: _sectionTitles,
+                    ),
+              BlocBuilder<PortfolioBloc, PortfolioState>(
+                builder: (context, state) {
+                  if (state is PortfolioLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is PortfolioError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Oops! Something went wrong',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Error: ${state.message}',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface.withOpacity(0.7),
+                                ),
+                          ),
+                          const SizedBox(height: 24),
+                          FilledButton.icon(
+                            onPressed: () => context.read<PortfolioBloc>().add(
+                              const LoadPortfolioData(),
+                            ),
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Retry'),
+                          ),
+                        ],
+                      ),
                     );
-                  },
-                ),
-                actions: [
-                  const ThemeSwitcher(),
-                  IconButton(
-                    icon: const Icon(Icons.palette),
-                    onPressed: () => setState(() => _themePanelVisible = true),
-                  ),
-                ],
-              )
-            : CustomAppBar(
-                onPressed: () =>
-                    setState(() => _themePanelVisible = !_themePanelVisible),
-                currentIndex: _currentIndex,
-                onSectionTapped: _scrollTo,
-                sectionTitles: _sectionTitles,
+                  }
+                  if (state is PortfolioLoaded) {
+                    final sections = [
+                      Container(
+                        key: _sectionKeys[0],
+                        child: const HeroSection(),
+                      ),
+                      Container(
+                        key: _sectionKeys[1],
+                        child: AboutSection(experiences: state.experiences),
+                      ),
+                      Container(
+                        key: _sectionKeys[2],
+                        child: SkillsSection(skills: state.skills),
+                      ),
+                      Container(
+                        key: _sectionKeys[3],
+                        child: ProjectsSection(
+                          projects: state.filteredProjects,
+                          selectedCategory: state.selectedCategory,
+                        ),
+                      ),
+                      Container(
+                        key: _sectionKeys[4],
+                        child: const ContactSection(),
+                      ),
+                    ];
+
+                    final content = SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Column(children: sections),
+                    );
+
+                    return Stack(
+                      children: [
+                        content,
+                        if (isDesktop) ...[
+                          ScrollToTopButton(
+                            scrollController: _scrollController,
+                          ),
+                          const PerformanceMonitor(),
+                        ],
+                        if (_themePanelVisible)
+                          ThemePanel(
+                            isVisible: _themePanelVisible,
+                            onClose: () =>
+                                setState(() => _themePanelVisible = false),
+                          ),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
-        body: BlocBuilder<PortfolioBloc, PortfolioState>(
-          builder: (context, state) {
-            if (state is PortfolioLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state is PortfolioError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Oops! Something went wrong',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Error: ${state.message}',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withOpacity(0.7),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton.icon(
-                      onPressed: () => context.read<PortfolioBloc>().add(
-                        const LoadPortfolioData(),
-                      ),
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-            if (state is PortfolioLoaded) {
-              final sections = [
-                Container(key: _sectionKeys[0], child: const HeroSection()),
-                Container(
-                  key: _sectionKeys[1],
-                  child: AboutSection(experiences: state.experiences),
-                ),
-                Container(
-                  key: _sectionKeys[2],
-                  child: SkillsSection(skills: state.skills),
-                ),
-                Container(
-                  key: _sectionKeys[3],
-                  child: ProjectsSection(
-                    projects: state.filteredProjects,
-                    selectedCategory: state.selectedCategory,
-                  ),
-                ),
-                Container(key: _sectionKeys[4], child: const ContactSection()),
-              ];
-
-              final content = SingleChildScrollView(
-                controller: _scrollController,
-                child: Column(children: sections),
-              );
-
-              return Stack(
-                children: [
-                  content,
-                  if (isDesktop) ...[
-                    ScrollToTopButton(scrollController: _scrollController),
-                    const PerformanceMonitor(),
-                  ],
-                  if (_themePanelVisible)
-                    ThemePanel(
-                      isVisible: _themePanelVisible,
-                      onClose: () => setState(() => _themePanelVisible = false),
-                    ),
-                ],
-              );
-            }
-            return const SizedBox.shrink();
-          },
+            ],
+          ),
         ),
         floatingActionButton: !isDesktop
             ? ScrollToTopButton(scrollController: _scrollController)
@@ -204,7 +222,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     context.read<PortfolioBloc>().add(const LoadPortfolioData());
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 5), () {
       if (mounted) setState(() => _showLoading = false);
     });
     _scrollController.addListener(_onScroll);
