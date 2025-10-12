@@ -1,23 +1,21 @@
-Write-Host "🚀 Building Flutter Web..." -ForegroundColor Cyan
+Write-Host "🚀 Building Flutter Web..."
 
 flutter clean
 flutter pub get
 flutter build web --release
 
-# 🧩 Add cache-busting version to index.html
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
-(Get-Content build/web/index.html) -replace '</head>', "<meta name='build-version' content='$timestamp'></head>" | Set-Content build/web/index.html
-Write-Host "🧩 Added cache-busting version: $timestamp" -ForegroundColor Green
+# 🧩 Add a timestamp to index.html to break cache
+$indexPath = "build\web\index.html"
+(Get-Content $indexPath) -replace '</head>', "<meta name='build-timestamp' content='$(Get-Date -Format "yyyyMMddHHmmss")'></head>" | Set-Content $indexPath
 
-Write-Host "📦 Committing source code..." -ForegroundColor Cyan
+Write-Host "📦 Committing source code..."
 git add .
-git commit -m "Update and deploy $timestamp" | Out-Null
+git commit -m "Update and deploy $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")" | Out-Null
 git push origin master
 
-Write-Host "🌐 Deploying to GitHub Pages..." -ForegroundColor Cyan
+Write-Host "🌐 Deploying to GitHub Pages..."
 git subtree split --prefix build/web -b gh-pages-temp
 git push origin gh-pages-temp:gh-pages --force
 git branch -D gh-pages-temp
 
-Write-Host "✅ Deployment complete!" -ForegroundColor Green
-Write-Host "🌍 Visit: https://3madhani.github.io"
+Write-Host "✅ Deployment complete! Visit https://3madhani.github.io"
