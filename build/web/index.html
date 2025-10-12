@@ -3,10 +3,12 @@
 
 <head>
   <base href="/">
+
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- SEO Meta Tags -->
   <meta name="description"
     content="Emad Hany | Flutter Developer Portfolio. Explore my work, projects, and skills in mobile and web development.">
   <meta name="author" content="Emad Hany">
@@ -16,33 +18,43 @@
   <meta property="og:url" content="https://3madhani.github.io">
   <meta name="twitter:card" content="summary_large_image">
 
+  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Emad Hany Portfolio">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="icons/favicon.png" />
+
+  <!-- Title -->
   <title>Emad Hany | Portfolio</title>
+
+  <!-- Manifest -->
   <link rel="manifest" href="manifest.json">
-<meta name='build-timestamp' content='20251012030236'></head>
+<meta name='build-timestamp' content='20251012031533'></head>
 
 <body>
-  <script src="flutter_bootstrap.js" async></script>
-
   <script>
+    // 🔄 Force update if a new version of the service worker is available
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        window.location.reload();
-      });
-
       window.addEventListener('load', () => {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-          for (let registration of registrations) {
-            registration.update();
-          }
-        });
+        navigator.serviceWorker.register('flutter_service_worker.js?v=1468060542').then((registration) => {
+          registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('⚡ New version detected — refreshing...');
+                window.location.reload(); // 🔁 Auto reload on new version
+              }
+            };
+          };
+        }).catch(err => console.error('Service worker registration failed:', err));
       });
     }
   </script>
+
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 
 </html>
