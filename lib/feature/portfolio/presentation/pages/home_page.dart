@@ -61,6 +61,7 @@ class _HomePageState extends State<HomePage> {
     return MagicCursorOverlay(
       enabled: isDesktop,
       child: Scaffold(
+        drawerScrimColor: Colors.transparent,
         drawer: isMobile
             ? Drawer(
                 child: CustomNavigationRail(
@@ -75,7 +76,6 @@ class _HomePageState extends State<HomePage> {
             : null,
         appBar: isMobile
             ? AppBar(
-                elevation: 0,
                 title: const Text('Emad Hany'),
                 leading: Builder(
                   builder: (ctx) {
@@ -163,12 +163,9 @@ class _HomePageState extends State<HomePage> {
                 Container(key: _sectionKeys[4], child: const ContactSection()),
               ];
 
-              final content = ScrollConfiguration(
-                behavior: const ScrollBehavior().copyWith(overscroll: false),
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Column(children: sections),
-                ),
+              final content = SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(children: sections),
               );
 
               return Stack(
