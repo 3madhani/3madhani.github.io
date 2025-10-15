@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/services/enhanced_portfolio_service.dart';
 import '../../../domain/entities/project.dart';
 import '../../../domain/usecases/get_experience.dart';
 import '../../../domain/usecases/get_projects.dart';
@@ -58,20 +59,23 @@ class PortfolioBloc extends Bloc<PortfolioEvent, PortfolioState> {
     emit(PortfolioLoading());
 
     try {
-      final projects = await getProjects();
-      final skills = await getSkills();
-      final experiences = await getExperience();
+      final enhancedService = EnhancedPortfolioService();
+
+      final projects = await enhancedService.getAllProjects();
+      final skills = enhancedService.getAllSkills();
+      final experiences = enhancedService.getAllExperiences();
 
       emit(
         PortfolioLoaded(
           projects: projects,
           filteredProjects: projects,
-          skills: skills,
           experiences: experiences,
+          skills: skills,
+          selectedCategory: ProjectCategory.all,
         ),
       );
     } catch (e) {
-      emit(PortfolioError(e.toString()));
+      emit(PortfolioError('Failed to load portfolio data: $e'));
     }
   }
 }

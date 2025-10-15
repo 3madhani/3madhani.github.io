@@ -57,7 +57,7 @@ class _Tilt3DState extends State<Tilt3D> {
             boxShadow: [
               BoxShadow(
                 color: theme.colorScheme.primary.withOpacity(
-                  _isHovered ? 0.6 : 0.4,
+                  _isHovered ? 0.4 : 0.2,
                 ),
                 blurRadius: _isHovered ? 20 : 10,
                 spreadRadius: _isHovered ? 2 : 0,

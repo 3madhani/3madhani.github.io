@@ -36,7 +36,6 @@ class _ThemeOptionState extends State<_ThemeOption> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -66,10 +65,8 @@ class _ThemeOptionState extends State<_ThemeOption> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Color Preview
               Expanded(
                 child: Container(
-                  width: double.infinity,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: widget.colors,
@@ -97,9 +94,56 @@ class _ThemeOptionState extends State<_ThemeOption> {
 
 class _ThemePanelState extends State<ThemePanel>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _slideAnimation;
-  late Animation<double> _fadeAnimation;
+  late final AnimationController _controller;
+  late final Animation<double> _slideAnimation;
+  late final Animation<double> _fadeAnimation;
+
+  final List<_ThemePreset> _presets = [
+    _ThemePreset(
+      name: 'Golden Elegance',
+      colors: [Color(0xFFD4AF37), Color(0xFFB8860B), Color(0xFFFFF8DC)],
+    ),
+    _ThemePreset(
+      name: 'Sunset Glow',
+      colors: [Color(0xFFFF6F61), Color(0xFFFFB88C), Color(0xFFFBB13C)],
+    ),
+    _ThemePreset(
+      name: 'Aurora Night',
+      colors: [Color(0xFF00BFA6), Color(0xFF00E5FF), Color(0xFFFF4081)],
+    ),
+    _ThemePreset(
+      name: 'Mint Fresh',
+      colors: [Color(0xFF00C9A7), Color(0xFFB2F7EF), Color(0xFF3EECAC)],
+    ),
+    _ThemePreset(
+      name: 'Ocean Breeze',
+      colors: [Color(0xFF0277BD), Color(0xFF29B6F6), Color(0xFF81D4FA)],
+    ),
+    _ThemePreset(
+      name: 'Noir Minimal',
+      colors: [Color(0xFF121212), Color(0xFF1E1E1E), Color(0xFF2C2C2C)],
+    ),
+    _ThemePreset(
+      name: 'Royal Violet',
+      colors: [Color(0xFF6A1B9A), Color(0xFF8E24AA), Color(0xFFBA68C8)],
+    ),
+    _ThemePreset(
+      name: 'Coral Dream',
+      colors: [Color(0xFFFF9A8B), Color(0xFFFF6A88), Color(0xFFFF99AC)],
+    ),
+    _ThemePreset(
+      name: 'Cyber Wave',
+      colors: [Color(0xFF00C6FF), Color(0xFF0072FF), Color(0xFF00E5FF)],
+    ),
+    _ThemePreset(
+      name: 'Emerald Mist',
+      colors: [Color(0xFF11998E), Color(0xFF38EF7D), Color(0xFFA8E063)],
+    ),
+    _ThemePreset(
+      name: 'Forest Harmony',
+      colors: [Color(0xFF2E7D32), Color(0xFF4CAF50), Color(0xFF81C784)],
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -111,152 +155,124 @@ class _ThemePanelState extends State<ThemePanel>
 
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) {
-        return Positioned(
-          top: 80,
-          right: 16,
-          child: Transform.translate(
-            offset: Offset(0, _slideAnimation.value),
-            child: Opacity(
-              opacity: _fadeAnimation.value,
-              child: Material(
-                elevation: 8,
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  width: 320,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: theme.colorScheme.outline.withOpacity(0.2),
+      builder: (_, __) => Positioned(
+        top: 80,
+        right: 16,
+        child: Transform.translate(
+          offset: Offset(0, _slideAnimation.value),
+          child: Opacity(
+            opacity: _fadeAnimation.value,
+            child: Material(
+              elevation: 10,
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                width: 320,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withOpacity(0.2),
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Choose Your Magic ✨',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: widget.onClose,
+                          icon: const Icon(Icons.close),
+                          style: IconButton.styleFrom(
+                            backgroundColor:
+                                theme.colorScheme.surfaceContainerHighest,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Header
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Choose Your Magic',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: widget.onClose,
-                            icon: const Icon(Icons.close),
-                            style: IconButton.styleFrom(
-                              backgroundColor:
-                                  theme.colorScheme.surfaceContainerHighest,
-                            ),
-                          ),
-                        ],
+
+                    const SizedBox(height: 24),
+
+                    // Presets
+                    Text(
+                      'Theme Presets',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
+                    ),
+                    const SizedBox(height: 16),
 
-                      const SizedBox(height: 24),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _presets.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 2.5,
+                          ),
+                      itemBuilder: (_, index) {
+                        final preset = _presets[index];
+                        return _ThemeOption(
+                          name: preset.name,
+                          colors: preset.colors,
+                          onTap: () => _selectTheme(preset.colors.first),
+                        );
+                      },
+                    ),
 
-                      // Predefined Themes
-                      Text(
-                        'Theme Presets',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                    const SizedBox(height: 24),
+
+                    // Custom Color
+                    Text(
+                      'Custom Seed Color',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: BlocBuilder<ThemeCubit, ThemeState>(
+                            builder: (_, state) => Container(
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: state.seedColor,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: theme.colorScheme.outline,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      GridView.count(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 2.5,
-                        children: [
-                          _ThemeOption(
-                            name: 'Ocean',
-                            colors: [
-                              const Color(0xFF0077BE),
-                              const Color(0xFF20B2AA),
-                            ],
-                            onTap: () => _selectTheme(const Color(0xFF0077BE)),
-                          ),
-                          _ThemeOption(
-                            name: 'Sunset',
-                            colors: [
-                              const Color(0xFFFF6B35),
-                              const Color(0xFFFF1744),
-                            ],
-                            onTap: () => _selectTheme(const Color(0xFFFF6B35)),
-                          ),
-                          _ThemeOption(
-                            name: 'Forest',
-                            colors: [
-                              const Color(0xFF2E7D32),
-                              const Color(0xFF795548),
-                            ],
-                            onTap: () => _selectTheme(const Color(0xFF2E7D32)),
-                          ),
-                          _ThemeOption(
-                            name: 'Neon',
-                            colors: [
-                              const Color.fromARGB(255, 231, 3, 79),
-                              const Color.fromARGB(255, 2, 210, 233),
-                            ],
-                            onTap: () => _selectTheme(const Color(0xFFE91E63)),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Custom Color Picker
-                      Text(
-                        'Custom Seed Color',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        const SizedBox(width: 12),
+                        FilledButton(
+                          onPressed: _showColorPicker,
+                          child: const Text('Pick'),
                         ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: BlocBuilder<ThemeCubit, ThemeState>(
-                              builder: (context, state) {
-                                return Container(
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    color: state.seedColor,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: theme.colorScheme.outline,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          FilledButton(
-                            onPressed: _showColorPicker,
-                            child: const Text('Pick'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -264,11 +280,7 @@ class _ThemePanelState extends State<ThemePanel>
   void didUpdateWidget(ThemePanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isVisible != oldWidget.isVisible) {
-      if (widget.isVisible) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
-      }
+      widget.isVisible ? _controller.forward() : _controller.reverse();
     }
   }
 
@@ -290,7 +302,6 @@ class _ThemePanelState extends State<ThemePanel>
       begin: 20,
       end: 0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
     _fadeAnimation = Tween<double>(
       begin: 0,
       end: 1,
@@ -303,32 +314,34 @@ class _ThemePanelState extends State<ThemePanel>
   }
 
   void _showColorPicker() {
-    // Implement color picker dialog
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text('Pick a Color'),
         content: ColorPicker(
           pickerColor: context.read<ThemeCubit>().state.seedColor,
-          onColorChanged: (color) {
-            context.read<ThemeCubit>().updateSeedColor(color);
-          },
+          onColorChanged: (color) =>
+              context.read<ThemeCubit>().updateSeedColor(color),
           paletteType: PaletteType.hsv,
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: Navigator.of(context).pop,
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () {
-              // Apply selected color
-              Navigator.of(context).pop();
-            },
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('Apply'),
           ),
         ],
       ),
     );
   }
+}
+
+class _ThemePreset {
+  final String name;
+  final List<Color> colors;
+
+  const _ThemePreset({required this.name, required this.colors});
 }

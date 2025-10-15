@@ -1,17 +1,47 @@
+import '../../domain/entities/experience.dart';
 import '../../domain/entities/project.dart';
 import '../../domain/entities/skill.dart';
 import '../models/project_model.dart';
 import '../models/skill_model.dart';
-import '../../domain/entities/experience.dart';
 
 class PortfolioLocalDatasource {
+  Future<List<Experience>> getExperience() async {
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    return [
+      const Experience(
+        company: 'Tech Innovators Inc.',
+        position: 'Senior Flutter Developer',
+        duration: '2022 - Present',
+        description:
+            'Leading Flutter development team and architecting mobile solutions.',
+        achievements: [
+          'Built 5+ production Flutter apps',
+          'Improved app performance by 40%',
+          'Mentored junior developers',
+        ],
+      ),
+      const Experience(
+        company: 'Digital Solutions Ltd.',
+        position: 'Mobile Developer',
+        duration: '2020 - 2022',
+        description:
+            'Developed cross-platform mobile applications using Flutter.',
+        achievements: [
+          'Delivered 10+ mobile projects',
+          'Implemented complex animations',
+          'Integrated various third-party services',
+        ],
+      ),
+    ];
+  }
+
   Future<List<ProjectModel>> getProjects() async {
     // Simulate loading from local JSON or assets
     await Future.delayed(const Duration(milliseconds: 500));
 
     return [
       const ProjectModel(
-        id: '1',
         title: 'E-commerce Flutter App',
         description:
             'A complete e-commerce solution built with Flutter, featuring user authentication, product catalog, shopping cart, and payment integration.',
@@ -23,7 +53,6 @@ class PortfolioLocalDatasource {
         color: '#FF6B35',
       ),
       const ProjectModel(
-        id: '2',
         title: 'Task Management Web App',
         description:
             'A responsive web application for task management with real-time collaboration features and advanced filtering options.',
@@ -35,7 +64,6 @@ class PortfolioLocalDatasource {
         color: '#4ECDC4',
       ),
       const ProjectModel(
-        id: '3',
         title: 'Fitness Tracker Mobile App',
         description:
             'A comprehensive fitness tracking application with workout plans, progress tracking, and social features.',
@@ -46,7 +74,6 @@ class PortfolioLocalDatasource {
         color: '#45B7D1',
       ),
       const ProjectModel(
-        id: '4',
         title: 'Portfolio Website',
         description:
             'A responsive portfolio website built with Flutter Web showcasing projects and skills with magical animations.',
@@ -116,37 +143,6 @@ class PortfolioLocalDatasource {
         level: 83,
         category: SkillCategory.mobile,
         icon: 'fas fa-mobile-alt',
-      ),
-    ];
-  }
-
-  Future<List<Experience>> getExperience() async {
-    await Future.delayed(const Duration(milliseconds: 200));
-
-    return [
-      const Experience(
-        company: 'Tech Innovators Inc.',
-        position: 'Senior Flutter Developer',
-        duration: '2022 - Present',
-        description:
-            'Leading Flutter development team and architecting mobile solutions.',
-        achievements: [
-          'Built 5+ production Flutter apps',
-          'Improved app performance by 40%',
-          'Mentored junior developers',
-        ],
-      ),
-      const Experience(
-        company: 'Digital Solutions Ltd.',
-        position: 'Mobile Developer',
-        duration: '2020 - 2022',
-        description:
-            'Developed cross-platform mobile applications using Flutter.',
-        achievements: [
-          'Delivered 10+ mobile projects',
-          'Implemented complex animations',
-          'Integrated various third-party services',
-        ],
       ),
     ];
   }

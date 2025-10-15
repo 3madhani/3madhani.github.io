@@ -115,11 +115,13 @@ class _CodeWindowState extends State<CodeWindow>
                   const SizedBox(width: 8),
                   _WindowButton(color: Colors.green.shade400),
                   const SizedBox(width: 16),
-                  Text(
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    'main.dart',
-                    style: theme.textTheme.titleSmall,
+                  Flexible(
+                    child: Text(
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      'main.dart',
+                      style: theme.textTheme.titleSmall,
+                    ),
                   ),
                 ],
               ),

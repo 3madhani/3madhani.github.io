@@ -81,6 +81,6 @@ class SectionWrapper extends StatelessWidget {
       );
     }
 
-    return contentWithScroll;
+    return sectionContent;
   }
 }

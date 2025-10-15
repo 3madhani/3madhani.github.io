@@ -5,64 +5,96 @@ import 'package:test_app/feature/portfolio/presentation/widgets/navigation/theme
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int currentIndex;
-  final Function(int) onSectionTapped;
+  final void Function(int) onSectionTapped;
   final List<String> sectionTitles;
-  final void Function()? onPressed;
+  final String titleText; // from fetched data
+  final VoidCallback? onPalettePressed;
+  final Widget? leading;
 
   const CustomAppBar({
-    this.onPressed,
     super.key,
     required this.currentIndex,
     required this.onSectionTapped,
     required this.sectionTitles,
+    required this.titleText,
+    this.onPalettePressed,
+    this.leading,
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(80);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    return AppBar(
-      backgroundColor: theme.colorScheme.surface.withOpacity(0.8),
-      elevation: 2,
-      title: Row(
-        children: [
-          Icon(Icons.flutter_dash, color: theme.colorScheme.primary, size: 32),
-          const SizedBox(width: 12),
-          AnimatedText(text: 'Portfolio', type: AnimationTextType.glitch),
-        ],
+    return Container(
+      height: preferredSize.height,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withOpacity(0.85),
+        border: Border(
+          bottom: BorderSide(
+            color: theme.colorScheme.outline.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
       ),
-      actions: [
-        ...sectionTitles.asMap().entries.map((entry) {
-          final index = entry.key;
-          final title = entry.value;
-          final isActive = index == currentIndex;
+      child: Row(
+        children: [
+          leading ?? SizedBox.shrink(),
+          // Logo & Title
+          MagneticButton(
+            radius: 28,
+            onTap: () {},
+            child: Icon(
+              Icons.flutter_dash,
+              color: theme.colorScheme.primary,
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 12),
+          AnimatedText(
+            text: titleText,
+            type: AnimationTextType.glitch,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Spacer(),
 
-          return TextButton(
-            onPressed: () => onSectionTapped(index),
-            child: Text(
-              title,
-              style: TextStyle(
-                color: isActive
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurface.withOpacity(0.7),
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+          // Section links
+          for (var i = 0; i < sectionTitles.length; i++) ...[
+            TextButton(
+              onPressed: () => onSectionTapped(i),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                minimumSize: const Size(0, 48),
+              ),
+              child: Text(
+                sectionTitles[i],
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: i == currentIndex
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withOpacity(0.7),
+                  fontWeight: i == currentIndex
+                      ? FontWeight.w600
+                      : FontWeight.normal,
+                ),
               ),
             ),
-          );
-        }),
+          ],
 
-        ThemeSwitcher(),
-
-        MagneticButton(
-          radius: 20,
-          onTap: onPressed ?? () {},
-          child: Icon(Icons.palette, color: theme.colorScheme.onSurface),
-        ),
-        SizedBox(width: 10),
-      ],
+          const SizedBox(width: 16),
+          const ThemeSwitcher(),
+          const SizedBox(width: 16),
+          MagneticButton(
+            radius: 20,
+            onTap: onPalettePressed,
+            child: Icon(Icons.palette, color: theme.colorScheme.onSurface),
+          ),
+        ],
+      ),
     );
   }
 }

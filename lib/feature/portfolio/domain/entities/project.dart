@@ -1,5 +1,4 @@
 class Project {
-  final String id;
   final String title;
   final String description;
   final List<String> technologies;
@@ -11,7 +10,6 @@ class Project {
   final String color;
 
   const Project({
-    required this.id,
     required this.title,
     required this.description,
     required this.technologies,

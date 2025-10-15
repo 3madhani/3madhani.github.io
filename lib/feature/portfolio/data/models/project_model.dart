@@ -2,7 +2,6 @@ import '../../domain/entities/project.dart';
 
 class ProjectModel extends Project {
   const ProjectModel({
-    required super.id,
     required super.title,
     required super.description,
     required super.technologies,
@@ -16,7 +15,6 @@ class ProjectModel extends Project {
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     return ProjectModel(
-      id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String,
       technologies: List<String>.from(json['technologies'] as List),
@@ -34,7 +32,6 @@ class ProjectModel extends Project {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'title': title,
       'description': description,
       'technologies': technologies,

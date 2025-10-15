@@ -7,6 +7,7 @@ import '../../../../../core/utils/responsive_helper.dart';
 import '../../../../../core/widgets/floating_shapes.dart';
 import '../../../../../core/widgets/magnetic_button.dart';
 import '../../../../../core/widgets/section_wrapper.dart';
+import '../../../data/personal_data.dart'; // Import personal data
 import '../../bloc/contact_bloc/contact_bloc.dart';
 import '../../widgets/animations/reveal_animation.dart';
 import '../../widgets/forms/contact_form.dart';
@@ -23,8 +24,8 @@ class ContactSection extends StatelessWidget {
       children: [
         const Positioned.fill(child: FloatingShapes(shapeCount: 5)),
         SectionWrapper(
-          title: 'Cast Your Message',
-          subtitle: "Let's create something magical together",
+          title: 'Let\'s Connect',
+          subtitle: "Ready to build something amazing together?",
           backgroundColor: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -45,14 +46,14 @@ class ContactSection extends StatelessWidget {
                           ? Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(child: _infoColumn(isMobile)),
+                                Expanded(child: _infoColumn(context, isMobile)),
                                 const SizedBox(width: 48),
                                 Expanded(child: _formCard()),
                               ],
                             )
                           : Column(
                               children: [
-                                _infoColumn(isMobile),
+                                _infoColumn(context, isMobile),
                                 const SizedBox(height: 40),
                                 _formCard(),
                               ],
@@ -61,8 +62,7 @@ class ContactSection extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
                   RevealAnimation(
-                    delay: const Duration(milliseconds: 400),
-                    duration: const Duration(milliseconds: 1),
+                    delay: const Duration(milliseconds: 600),
                     child: const _SocialLinks(),
                   ),
                 ],
@@ -77,8 +77,9 @@ class ContactSection extends StatelessWidget {
   Widget _formCard() {
     return RevealAnimation(
       delay: const Duration(milliseconds: 400),
-      duration: const Duration(milliseconds: 1),
       child: Card(
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: BlocProvider(
@@ -90,44 +91,96 @@ class ContactSection extends StatelessWidget {
     );
   }
 
-  Widget _infoColumn(bool isMobile) {
+  Widget _infoColumn(BuildContext context, bool isMobile) {
     return RevealAnimation(
-      delay: const Duration(milliseconds: 400),
-      duration: const Duration(milliseconds: 1),
+      delay: const Duration(milliseconds: 200),
       child: Column(
         crossAxisAlignment: isMobile
             ? CrossAxisAlignment.center
             : CrossAxisAlignment.start,
         children: [
+          // Personal intro
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withOpacity(0.3),
+                  Theme.of(
+                    context,
+                  ).colorScheme.secondaryContainer.withOpacity(0.3),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: isMobile
+                  ? CrossAxisAlignment.center
+                  : CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Ready to collaborate?",
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  textAlign: isMobile ? TextAlign.center : TextAlign.left,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Let's discuss your next Flutter project and create something exceptional together.",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: isMobile ? TextAlign.center : TextAlign.left,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Contact info cards
           _ContactInfoCard(
-            onTap: () {
-              launchUrl(Uri.parse('https://github.com/EmadHany'));
-            },
-            icon: Icons.email,
+            onTap: () => _launchUrl('mailto:$contactEmail'),
+            icon: Icons.email_outlined,
             title: 'Email',
-            content: 'emad-hany@outlook.com',
+            content: contactEmail,
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 16),
           _ContactInfoCard(
-            icon: Icons.phone,
+            onTap: () => _launchUrl('tel:$contactPhone'),
+            icon: Icons.phone_outlined,
             title: 'Phone',
-            content: '+20 123 456 7890',
+            content: contactPhone,
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 16),
           _ContactInfoCard(
-            icon: Icons.location_on,
+            icon: Icons.location_on_outlined,
             title: 'Location',
-            content: 'Remote & Worldwide',
+            content: contactLocation,
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 16),
           _ContactInfoCard(
-            icon: Icons.auto_awesome,
-            title: 'Availability',
-            content: 'Ready for magical projects',
+            icon: Icons.work_outline,
+            title: 'Status',
+            content: 'Open to remote, onsite, and freelance opportunities',
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 }
 
@@ -158,7 +211,9 @@ class _ContactInfoCardState extends State<_ContactInfoCard>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
+      cursor: widget.onTap != null
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.basic,
       onEnter: (_) => _onHover(true),
       onExit: (_) => _onHover(false),
       child: GestureDetector(
@@ -168,49 +223,72 @@ class _ContactInfoCardState extends State<_ContactInfoCard>
           builder: (_, child) {
             return Transform.scale(scale: _scaleAnim.value, child: child);
           },
-          child: Card(
-            elevation: _hovered ? 20 : 2,
-            shape: RoundedRectangleBorder(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _hovered
+                    ? theme.colorScheme.primary.withOpacity(0.3)
+                    : theme.colorScheme.outline.withOpacity(0.2),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: _hovered
+                      ? theme.colorScheme.primary.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.05),
+                  blurRadius: _hovered ? 12 : 4,
+                  offset: Offset(0, _hovered ? 4 : 2),
+                ),
+              ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      widget.icon,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.title,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                  child: Icon(
+                    widget.icon,
+                    color: theme.colorScheme.onPrimaryContainer,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.content,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.7),
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.content,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (widget.onTap != null) ...[
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.open_in_new,
+                    size: 16,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
                   ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
@@ -265,18 +343,23 @@ class _SocialButton extends StatelessWidget {
       radius: 80,
       onTap: _launchUrl,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
         ),
-        child: Column(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 32, color: theme.colorScheme.primary),
-            const SizedBox(height: 8),
-            Text(label, style: theme.textTheme.labelMedium),
+            Icon(icon, size: 20, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
         ),
       ),
@@ -297,22 +380,29 @@ class _SocialLinks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final social = [
-      {'icon': Icons.code, 'label': 'GitHub', 'url': 'https://github.com'},
-      {'icon': Icons.work, 'label': 'LinkedIn', 'url': 'https://linkedin.com'},
+
+    // Real social links from personal data
+    final socialLinks = [
+      {'icon': Icons.code, 'label': 'GitHub', 'url': githubUrl},
+      {'icon': Icons.work_outline, 'label': 'LinkedIn', 'url': linkedInUrl},
       {
-        'icon': Icons.email,
+        'icon': Icons.email_outlined,
         'label': 'Email',
-        'url': 'mailto:flutter.magician@example.com',
+        'url': 'mailto:$contactEmail',
       },
-      {'icon': Icons.chat, 'label': 'Twitter', 'url': 'https://twitter.com'},
+      {
+        'icon': Icons.phone_outlined,
+        'label': 'WhatsApp',
+        'url':
+            'https://wa.me/${contactPhone.replaceAll('+', '').replaceAll(' ', '')}',
+      },
     ];
 
     return Column(
       children: [
         Text(
           'Connect with me',
-          style: theme.textTheme.titleLarge?.copyWith(
+          style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -321,7 +411,7 @@ class _SocialLinks extends StatelessWidget {
           alignment: WrapAlignment.center,
           spacing: 16,
           runSpacing: 16,
-          children: social.map((link) {
+          children: socialLinks.map((link) {
             return _SocialButton(
               icon: link['icon'] as IconData,
               label: link['label'] as String,
@@ -330,9 +420,36 @@ class _SocialLinks extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: 32),
-        AnimatedText(
-          text: '@ 2025 made with ❤️♥️ by Emad Hany',
-          type: AnimationTextType.typewriter,
+
+        // Footer with your name
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: theme.colorScheme.outline.withOpacity(0.2),
+              ),
+            ),
+          ),
+          child: Column(
+            children: [
+              AnimatedText(
+                text: '© 2025 Made with ❤️ by $contactName',
+                type: AnimationTextType.typewriter,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                contactTitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

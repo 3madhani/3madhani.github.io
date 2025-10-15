@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:test_app/core/widgets/floating_shapes.dart';
+import 'package:test_app/core/widgets/magnetic_button.dart';
+import 'package:test_app/core/widgets/section_wrapper.dart';
 import 'package:test_app/core/widgets/tilt_3d.dart';
+
 import '../../../domain/entities/project.dart';
 import '../../bloc/portfolio_bloc/portfolio_bloc.dart';
 import '../../bloc/portfolio_bloc/portfolio_event.dart';
 import '../../widgets/animations/reveal_animation.dart';
 import '../../widgets/cards/project_card.dart';
 import '../../widgets/modals/project_modal.dart';
-import '../../../../../core/widgets/magnetic_button.dart';
-import '../../../../../core/widgets/section_wrapper.dart';
 
 class ProjectsSection extends StatelessWidget {
   final List<Project> projects;
@@ -34,14 +36,17 @@ class ProjectsSection extends StatelessWidget {
     ];
 
     int crossAxisCount = 1;
-    if (width >= 1200)
+    if (width >= 1200) {
       crossAxisCount = 4;
-    else if (width >= 900)
+    } else if (width >= 900) {
       crossAxisCount = 3;
-    else if (width >= 600)
+    } else if (width >= 600) {
       crossAxisCount = 2;
+    }
 
     return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.topCenter,
       children: [
         const Positioned.fill(child: FloatingShapes(shapeCount: 4)),
         SectionWrapper(
@@ -51,8 +56,7 @@ class ProjectsSection extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              theme.colorScheme.primaryContainer.withOpacity(0.1),
-              theme.colorScheme.primaryContainer.withOpacity(0.1),
+              theme.colorScheme.primaryContainer.withOpacity(0.0999),
               theme.colorScheme.surface.withOpacity(0.1),
             ],
           ),
@@ -76,8 +80,11 @@ class ProjectsSection extends StatelessWidget {
                       child: FilterChip(
                         label: Text(_getCategoryName(category)),
                         selected: isSelected,
-                        onSelected: (_) {},
+                        onSelected: (_) => context.read<PortfolioBloc>().add(
+                          FilterProjects(category),
+                        ),
                         selectedColor: theme.colorScheme.primaryContainer,
+                        checkmarkColor: theme.colorScheme.onPrimaryContainer,
                       ),
                     );
                   }).toList(),
@@ -90,42 +97,57 @@ class ProjectsSection extends StatelessWidget {
                 duration: const Duration(milliseconds: 400),
                 child: projects.isEmpty
                     ? _buildEmptyState(context)
-                    : GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
-                          crossAxisSpacing: 24,
-                          mainAxisSpacing: 24,
-                          childAspectRatio: isMobile
-                              ? 0.86
-                              : isTablet
-                              ? 1.0
-                              : 1.14,
+                    : Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.sizeOf(context).width,
                         ),
-                        itemCount: projects.length,
-                        itemBuilder: (context, index) {
-                          final project = projects[index];
-                          return TweenAnimationBuilder<double>(
-                            duration: Duration(milliseconds: 300 + index * 100),
-                            tween: Tween(begin: 0, end: 1),
-                            builder: (context, value, child) {
-                              return Transform.translate(
-                                offset: Offset(0, (1 - value) * 50),
-                                child: Opacity(
-                                  opacity: value,
-                                  child: Tilt3D(
-                                    child: ProjectCard(
-                                      project: project,
-                                      onTap: () =>
-                                          _showProjectModal(context, project),
-                                    ),
+                        child: MasonryGridView.count(
+                          clipBehavior: Clip.none,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: 24,
+                          crossAxisSpacing: 24,
+                          itemCount: projects.length,
+                          itemBuilder: (context, index) {
+                            final project = projects[index];
+                            final delay = (index * 0.08).clamp(0.0, 0.8);
+
+                            return TweenAnimationBuilder<double>(
+                              duration: Duration(
+                                milliseconds: 300 + index * 100,
+                              ),
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              builder: (context, value, child) {
+                                final t = (value - delay).clamp(0.0, 1.0);
+                                final eased = Curves.easeOutBack.transform(t);
+                                return Transform.translate(
+                                  offset: Offset(0, (1 - eased) * 50),
+                                  child: Opacity(
+                                    opacity: t,
+                                    child: isMobile || isTablet
+                                        ? ProjectCard(
+                                            project: project,
+                                            onTap: () => _showProjectModal(
+                                              context,
+                                              project,
+                                            ),
+                                          )
+                                        : Tilt3D(
+                                            child: ProjectCard(
+                                              project: project,
+                                              onTap: () => _showProjectModal(
+                                                context,
+                                                project,
+                                              ),
+                                            ),
+                                          ),
                                   ),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
               ),
             ],
