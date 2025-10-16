@@ -32,10 +32,20 @@ class _SkillsSectionState extends State<SkillsSection>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final width = MediaQuery.of(context).size.width;
+
+    // Calculate crossAxisCount based on screen width
+    int crossAxisCount = 1;
+    if (width >= 1200) {
+      crossAxisCount = 4;
+    } else if (width >= 900) {
+      crossAxisCount = 3;
+    } else if (width >= 600) {
+      crossAxisCount = 2;
+    }
 
     return Stack(
       clipBehavior: Clip.none,
-      alignment: Alignment.topCenter,
       children: [
         const Positioned.fill(child: FloatingShapes(shapeCount: 8)),
         SectionWrapper(
@@ -50,6 +60,7 @@ class _SkillsSectionState extends State<SkillsSection>
           title: 'Technical Skills',
           subtitle: 'Technologies and tools I work with',
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Category filters with "All" first
               RevealAnimation(
@@ -125,58 +136,49 @@ class _SkillsSectionState extends State<SkillsSection>
                 const SizedBox(height: 24),
               ],
 
-              // Skills grid
-              RevealAnimation(
-                duration: const Duration(milliseconds: 400),
-                offset: const Offset(0, 50),
-                child: _filteredSkills.isEmpty
-                    ? _buildEmptyState()
-                    : Container(
+              // Skills grid - Remove RevealAnimation wrapper that might clip content
+              _filteredSkills.isEmpty
+                  ? RevealAnimation(
+                      duration: const Duration(milliseconds: 400),
+                      offset: const Offset(0, 50),
+                      child: _buildEmptyState(),
+                    )
+                  : Center(
+                      child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1200),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            int crossAxisCount = 1;
-                            final width = constraints.maxWidth;
-                            if (width >= 1200) {
-                              crossAxisCount = 4;
-                            } else if (width >= 900) {
-                              crossAxisCount = 3;
-                            } else if (width >= 600) {
-                              crossAxisCount = 2;
-                            }
+                        child: MasonryGridView.count(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisCount: crossAxisCount,
+                          mainAxisSpacing: 24,
+                          crossAxisSpacing: 24,
+                          itemCount: _filteredSkills.length,
+                          itemBuilder: (context, index) {
+                            final skill = _filteredSkills[index];
+                            // Reduce delay spread to ensure all items complete animation
+                            final delay = (index * 0.05).clamp(0.0, 0.5);
 
-                            return MasonryGridView.count(
-                              clipBehavior: Clip.none,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
+                            return AnimatedBuilder(
+                              animation: _animController,
+                              builder: (ctx, child) {
+                                // Calculate animation progress with delay
+                                final progress = (_animController.value - delay)
+                                    .clamp(0.0, 1.0);
+                                final curved = Curves.easeOutCubic.transform(
+                                  progress,
+                                );
 
-                              crossAxisCount: crossAxisCount,
-                              mainAxisSpacing: 24,
-                              crossAxisSpacing: 24,
-                              itemCount: _filteredSkills.length,
-                              itemBuilder: (context, index) {
-                                final skill = _filteredSkills[index];
-                                final delay = (index * 0.1).clamp(0.0, 1.0);
-
-                                return AnimatedBuilder(
-                                  animation: _animController,
-                                  builder: (ctx, child) {
-                                    final t = (_animController.value - delay)
-                                        .clamp(0.0, 1.0);
-                                    final e = Curves.easeOutBack.transform(t);
-                                    return Transform.translate(
-                                      offset: Offset(0, (1 - e) * 50),
-                                      child: Opacity(opacity: t, child: child),
-                                    );
-                                  },
-                                  child: SkillCard(skill: skill),
+                                return Transform.translate(
+                                  offset: Offset(0, (1 - curved) * 180),
+                                  child: child,
                                 );
                               },
+                              child: SkillCard(skill: skill),
                             );
                           },
                         ),
                       ),
-              ),
+                    ),
             ],
           ),
         ),
@@ -195,7 +197,7 @@ class _SkillsSectionState extends State<SkillsSection>
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 1200), // Increased duration
     )..forward();
   }
 
@@ -204,6 +206,7 @@ class _SkillsSectionState extends State<SkillsSection>
     return Container(
       padding: const EdgeInsets.all(48),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             Icons.search_off,

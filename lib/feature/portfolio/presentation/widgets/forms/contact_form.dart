@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+
 import '../../bloc/contact_bloc/contact_bloc.dart';
 import '../../bloc/contact_bloc/contact_event.dart';
 import '../../bloc/contact_bloc/contact_state.dart';
@@ -17,34 +19,6 @@ class _ContactFormState extends State<ContactForm> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _messageController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _messageController.dispose();
-    super.dispose();
-  }
-
-  void _submitForm() {
-    if (_formKey.currentState?.validate() ?? false) {
-      context.read<ContactBloc>().add(
-        ContactFormSubmitted(
-          name: _nameController.text.trim(),
-          email: _emailController.text.trim(),
-          message: _messageController.text.trim(),
-        ),
-      );
-    }
-  }
-
-  void _resetForm() {
-    _formKey.currentState?.reset();
-    _nameController.clear();
-    _emailController.clear();
-    _messageController.clear();
-    context.read<ContactBloc>().add(const ContactFormReset());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +60,7 @@ class _ContactFormState extends State<ContactForm> {
             FloatingLabelField(
               controller: _nameController,
               label: 'Your Name',
-              icon: Icons.person,
+              icon: LucideIcons.user,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Please enter your name';
@@ -100,7 +74,7 @@ class _ContactFormState extends State<ContactForm> {
             FloatingLabelField(
               controller: _emailController,
               label: 'Your Email',
-              icon: Icons.email,
+              icon: LucideIcons.mail,
               keyboardType: TextInputType.emailAddress,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -118,7 +92,7 @@ class _ContactFormState extends State<ContactForm> {
             FloatingLabelField(
               controller: _messageController,
               label: 'Your Message',
-              icon: Icons.message,
+              icon: LucideIcons.messagesSquare,
               maxLines: 5,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -145,7 +119,7 @@ class _ContactFormState extends State<ContactForm> {
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.send),
+                      : const Icon(LucideIcons.send),
                   label: Text(
                     isSubmitting ? 'Sending...' : 'Send Magical Message',
                   ),
@@ -159,5 +133,33 @@ class _ContactFormState extends State<ContactForm> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  void _resetForm() {
+    _formKey.currentState?.reset();
+    _nameController.clear();
+    _emailController.clear();
+    _messageController.clear();
+    context.read<ContactBloc>().add(const ContactFormReset());
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState?.validate() ?? false) {
+      context.read<ContactBloc>().add(
+        ContactFormSubmitted(
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          message: _messageController.text.trim(),
+        ),
+      );
+    }
   }
 }

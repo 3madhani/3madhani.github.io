@@ -1,27 +1,29 @@
+import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../../domain/entities/skill.dart';
 
 IconData _iconFor(String icon) {
   switch (icon) {
     case 'fab fa-flutter':
-      return Icons.flutter_dash;
+      return LucideIcons.zap;
     case 'fas fa-code':
-      return Icons.code;
+      return LucideIcons.code2;
     case 'fas fa-fire':
-      return Icons.local_fire_department;
+      return LucideIcons.flame;
     case 'fas fa-mobile-alt':
-      return Icons.phone_android;
+      return LucideIcons.smartphone;
     case 'fas fa-palette':
-      return Icons.palette;
+      return LucideIcons.paintBucket;
     case 'fas fa-database':
-      return Icons.storage;
+      return LucideIcons.database;
     case 'fab fa-git-alt':
-      return Icons.source;
+      return LucideIcons.gitBranch;
     case 'fas fa-tools':
-      return Icons.build;
+      return LucideIcons.wrench;
     default:
-      return Icons.star;
+      return LucideIcons.star;
   }
 }
 
@@ -45,33 +47,29 @@ class _SkillCardState extends State<SkillCard>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 🔹 Breakpoints
         final isMobile = constraints.maxWidth < 450;
-        final isTablet =
-            constraints.maxWidth < 900 && constraints.maxWidth >= 450;
-
-        // 🔹 Responsive values
-        final double iconSize = isMobile
+        final isTablet = constraints.maxWidth < 900 && !isMobile;
+        final iconSize = isMobile
             ? 40
             : isTablet
             ? 48
             : 56;
-        final double containerSize = iconSize + 16;
-        final double padding = isMobile
+        final containerSize = iconSize + 16;
+        final padding = isMobile
             ? 12
             : isTablet
             ? 16
             : 20;
-        final double fontSize = isMobile
+        final fontSize = isMobile
             ? 14
             : isTablet
             ? 15
             : 16;
-        final double progressHeight = isMobile ? 6 : 8;
+        final progressHeight = isMobile ? 6 : 8;
 
         return MouseRegion(
-          onEnter: (_) => _onHover(true),
-          onExit: (_) => _onHover(false),
+          onEnter: (_) => _hoverController.forward(),
+          onExit: (_) => _hoverController.reverse(),
           child: AnimatedBuilder(
             animation: _hoverController,
             builder: (context, child) {
@@ -86,29 +84,24 @@ class _SkillCardState extends State<SkillCard>
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Padding(
-                padding: EdgeInsets.all(padding),
+                padding: EdgeInsets.all(padding.toDouble()),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // 🟣 Icon
                     Container(
-                      width: containerSize,
-                      height: containerSize,
+                      width: containerSize.toDouble(),
+                      height: containerSize.toDouble(),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         _iconFor(widget.skill.icon),
-                        size: iconSize,
+                        size: iconSize.toDouble(),
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
                     SizedBox(height: isMobile ? 10 : 16),
-
-                    // 🟣 Skill Name
                     Text(
                       widget.skill.name,
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -118,52 +111,43 @@ class _SkillCardState extends State<SkillCard>
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: isMobile ? 8 : 12),
-
-                    // 🟣 Progress Bar
-                    AnimatedBuilder(
-                      animation: _hoverController,
-                      builder: (context, _) {
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Proficiency',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontSize: fontSize - 1,
-                                  ),
-                                ),
-                                Text(
-                                  '${widget.skill.level}%',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: fontSize - 1,
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              'Proficiency',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: fontSize - 1,
+                              ),
                             ),
-                            SizedBox(height: 6),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: LinearProgressIndicator(
-                                value: _progressAnim.value,
-                                minHeight: progressHeight,
-                                backgroundColor:
-                                    theme.colorScheme.surfaceContainerHighest,
-                                valueColor: AlwaysStoppedAnimation(
-                                  theme.colorScheme.primary,
-                                ),
+                            Text(
+                              '${widget.skill.level}%',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: fontSize - 1,
                               ),
                             ),
                           ],
-                        );
-                      },
+                        ),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: _progressAnim.value,
+                            minHeight: progressHeight.toDouble(),
+                            backgroundColor:
+                                theme.colorScheme.surfaceContainerHighest,
+                            valueColor: AlwaysStoppedAnimation(
+                              theme.colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: isMobile ? 10 : 16),
-
-                    // 🟣 Category badge
                     Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: isMobile ? 10 : 12,
@@ -174,7 +158,7 @@ class _SkillCardState extends State<SkillCard>
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        _categoryName(widget.skill.category),
+                        widget.skill.category.name.capitalize(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           fontSize: fontSize - 2,
@@ -204,26 +188,13 @@ class _SkillCardState extends State<SkillCard>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-
     _elevationAnim = Tween<double>(
       begin: 2,
       end: 10,
     ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOut));
-
     _progressAnim = Tween<double>(
       begin: 0.0,
       end: widget.skill.level / 100,
     ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOut));
-  }
-
-  String _categoryName(SkillCategory c) =>
-      c.name[0].toUpperCase() + c.name.substring(1);
-
-  void _onHover(bool hover) {
-    if (hover) {
-      _hoverController.forward();
-    } else {
-      _hoverController.reverse();
-    }
   }
 }

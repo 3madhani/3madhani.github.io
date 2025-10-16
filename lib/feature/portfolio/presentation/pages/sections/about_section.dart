@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:test_app/core/widgets/tilt_3d.dart';
 import 'package:test_app/feature/portfolio/domain/entities/project.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -104,13 +105,13 @@ class AboutSection extends StatelessWidget {
                         children: [
                           CustomButton(
                             text: 'Download CV',
-                            icon: Icons.download_outlined,
+                            icon: LucideIcons.downloadCloud,
                             onPressed: _downloadCV,
                             type: CustomButtonType.primary,
                           ),
                           CustomButton(
                             text: 'View GitHub',
-                            icon: Icons.code,
+                            icon: LucideIcons.github,
                             onPressed: () => _launchURL(githubUrl),
                             type: CustomButtonType.outline,
                           ),
@@ -128,7 +129,6 @@ class AboutSection extends StatelessWidget {
   }
 
   void _downloadCV() {
-    // You can implement direct CV download or redirect to GitHub
     _launchURL(cvLink);
   }
 
@@ -148,15 +148,12 @@ class AboutSection extends StatelessWidget {
             ? CrossAxisAlignment.center
             : CrossAxisAlignment.start,
         children: [
-          // Professional summary from CV
           Text(
             professionalSummary,
             style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
             textAlign: isMobile ? TextAlign.center : TextAlign.left,
           ),
           const SizedBox(height: 24),
-
-          // Additional info
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -175,7 +172,7 @@ class AboutSection extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.school_outlined,
+                      LucideIcons.graduationCap,
                       color: theme.colorScheme.primary,
                       size: 20,
                     ),
@@ -267,7 +264,6 @@ class _ExperienceCardState extends State<_ExperienceCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Position & Duration
             Row(
               children: [
                 Expanded(
@@ -298,8 +294,6 @@ class _ExperienceCardState extends State<_ExperienceCard> {
               ],
             ),
             const SizedBox(height: 4),
-
-            // Company
             Text(
               widget.experience.company,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -308,8 +302,6 @@ class _ExperienceCardState extends State<_ExperienceCard> {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Description
             Text(
               widget.experience.description,
               style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
@@ -380,7 +372,6 @@ class _StatCardState extends State<_StatCard>
               ),
               child: Column(
                 children: [
-                  // Animated icon container
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.all(12),
@@ -403,8 +394,6 @@ class _StatCardState extends State<_StatCard>
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Animated counter
                   AnimatedCounter(
                     value: widget.value,
                     style: theme.textTheme.headlineMedium?.copyWith(
@@ -415,8 +404,6 @@ class _StatCardState extends State<_StatCard>
                     ),
                   ),
                   const SizedBox(height: 8),
-
-                  // Label with animation
                   AnimatedDefaultTextStyle(
                     duration: const Duration(milliseconds: 200),
                     style:
@@ -484,23 +471,14 @@ class _StatisticsRow extends StatelessWidget {
     final isMobile = ResponsiveHelper.isMobile(context);
     final theme = Theme.of(context);
 
-    // Updated stats based on your experience level
     final stats = [
       {
-        'value': projects.length, // Realistic for a new graduate
+        'value': projects.length,
         'label': 'Projects\nCompleted',
-        'icon': Icons.code,
+        'icon': LucideIcons.code2,
       },
-      {
-        'value': 2, // Based on your 2023-present experience
-        'label': 'Years\nExperience',
-        'icon': Icons.schedule,
-      },
-      {
-        'value': 5, // Realistic client count
-        'label': 'Happy\nClients',
-        'icon': Icons.favorite,
-      },
+      {'value': 2, 'label': 'Years\nExperience', 'icon': LucideIcons.clock},
+      {'value': 5, 'label': 'Happy\nClients', 'icon': LucideIcons.heart},
     ];
 
     return Column(
@@ -562,9 +540,6 @@ class _TimelineRow extends StatelessWidget {
         clipBehavior: Clip.none,
         alignment: Alignment.centerLeft,
         children: [
-          // Timeline column
-
-          // Dot
           Positioned(
             left: -5,
             top: 0,
@@ -577,25 +552,20 @@ class _TimelineRow extends StatelessWidget {
               ),
             ),
           ),
-
-          // Line (only if not last)
           if (!isLast)
             Positioned(
               bottom: isLast ? null : -24,
               top: !isLast ? 0 : null,
               child: Container(
                 width: 2,
-                height: 140, // adjust to match card height
+                height: 140,
                 color: theme.colorScheme.outline.withOpacity(0.3),
               ),
             ),
-
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(width: 24),
-
-              // Experience card
+              const SizedBox(width: 24),
               Expanded(child: _ExperienceCard(experience: experience)),
             ],
           ),

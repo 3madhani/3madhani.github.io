@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test_app/feature/portfolio/data/personal_data.dart';
 
 import '../../../../../core/widgets/glass_container.dart';
 
@@ -45,12 +46,12 @@ class CustomNavigationRail extends StatelessWidget {
                   child: Icon(
                     Icons.flutter_dash,
                     color: theme.colorScheme.onPrimary,
-                    size: 32,
+                    size: 36,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Flutter Magician',
+                  contactName,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,

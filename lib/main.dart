@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 
 import 'core/themes/app_theme.dart';
 import 'feature/portfolio/presentation/bloc/portfolio_bloc/portfolio_bloc.dart';
@@ -35,18 +34,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<ThemeCubit>(
-          create: (_) => GetIt.instance<ThemeCubit>()..loadTheme(),
+        BlocProvider(
+          create: (_) => di.sl<PortfolioBloc>()..add(const LoadPortfolioData()),
         ),
-        BlocProvider<PortfolioBloc>(
-          create: (_) =>
-              GetIt.instance<PortfolioBloc>()..add(const LoadPortfolioData()),
-        ),
+        BlocProvider(create: (_) => di.sl<ThemeCubit>()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {
           return MaterialApp(
-            title: 'Emad Hany | Portfolio',
+            title: 'Emad Hany Portfolio',
             debugShowCheckedModeBanner: false,
             themeMode: themeState.themeMode,
             theme: AppTheme.lightTheme(themeState.seedColor),

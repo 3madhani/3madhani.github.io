@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/utils/responsive_helper.dart';
@@ -71,8 +72,8 @@ class HeroSection extends StatelessWidget {
                             RevealAnimation(
                               delay: const Duration(milliseconds: 400),
                               child: AnimatedText(
-                                delay: Duration(seconds: 1),
-                                text: contactName, // From personal_data.dart
+                                delay: const Duration(seconds: 1),
+                                text: contactName,
                                 type: AnimationTextType.typewriter,
                                 style: theme.textTheme.displayLarge?.copyWith(
                                   fontSize: ResponsiveHelper.getHeroFontSize(
@@ -96,9 +97,9 @@ class HeroSection extends StatelessWidget {
                             const SizedBox(height: 16),
                             RevealAnimation(
                               delay: const Duration(milliseconds: 600),
-                              duration: Duration(seconds: 2),
+                              duration: const Duration(seconds: 2),
                               child: AnimatedText(
-                                text: contactTitle, // From personal_data.dart
+                                text: contactTitle,
                                 type: AnimationTextType.slideUp,
                                 style: theme.textTheme.headlineMedium?.copyWith(
                                   color: theme.colorScheme.onSurface
@@ -114,7 +115,7 @@ class HeroSection extends StatelessWidget {
                                   maxWidth: isMobile ? size.width : 600,
                                 ),
                                 child: Text(
-                                  professionalSummary, // From personal_data.dart
+                                  professionalSummary,
                                   style: theme.textTheme.bodyLarge,
                                   textAlign: isMobile
                                       ? TextAlign.center
@@ -138,7 +139,7 @@ class HeroSection extends StatelessWidget {
                                 children: [
                                   CustomButton(
                                     text: 'View Projects',
-                                    icon: Icons.work_outline,
+                                    icon: LucideIcons.codesandbox,
                                     onPressed:
                                         onViewProjects ??
                                         () => _scrollToSection(
@@ -149,7 +150,7 @@ class HeroSection extends StatelessWidget {
                                   ),
                                   CustomButton(
                                     text: 'Contact Me',
-                                    icon: Icons.contact_mail_outlined,
+                                    icon: LucideIcons.contact,
                                     onPressed:
                                         onContactMe ??
                                         () => _scrollToSection(
@@ -160,7 +161,7 @@ class HeroSection extends StatelessWidget {
                                   ),
                                   CustomButton(
                                     text: 'Download CV',
-                                    icon: Icons.download_outlined,
+                                    icon: LucideIcons.downloadCloud,
                                     onPressed: () => _downloadCV(),
                                     type: CustomButtonType.outline,
                                   ),
@@ -168,7 +169,6 @@ class HeroSection extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            // Social Links
                             RevealAnimation(
                               delay: const Duration(milliseconds: 1200),
                               child: Wrap(
@@ -178,17 +178,17 @@ class HeroSection extends StatelessWidget {
                                     : WrapAlignment.start,
                                 children: [
                                   _SocialButton(
-                                    icon: Icons.code,
+                                    icon: LucideIcons.github,
                                     tooltip: 'GitHub',
                                     onPressed: () => _launchURL(githubUrl),
                                   ),
                                   _SocialButton(
-                                    icon: Icons.work_outline,
+                                    icon: LucideIcons.linkedin,
                                     tooltip: 'LinkedIn',
                                     onPressed: () => _launchURL(linkedInUrl),
                                   ),
                                   _SocialButton(
-                                    icon: Icons.email_outlined,
+                                    icon: LucideIcons.mail,
                                     tooltip: 'Email',
                                     onPressed: () =>
                                         _launchURL('mailto:$contactEmail'),
@@ -212,15 +212,10 @@ class HeroSection extends StatelessWidget {
     );
   }
 
-  void _downloadCV() {
-    // Implement CV download functionality
-    // You can use url_launcher to open a direct link to your CV
-    _launchURL(cvLink);
-  }
+  void _downloadCV() => _launchURL(cvLink);
 
   void _launchURL(String url) async {
-    // Import url_launcher package
-    final Uri uri = Uri.parse(url);
+    final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -228,25 +223,14 @@ class HeroSection extends StatelessWidget {
 
   void _scrollToSection(BuildContext context, String section) {
     if (scrollController == null) return;
-
     final height = MediaQuery.of(context).size.height;
-    double offset = 0;
-
-    switch (section) {
-      case 'about':
-        offset = height;
-        break;
-      case 'skills':
-        offset = height * 2;
-        break;
-      case 'projects':
-        offset = height * 3;
-        break;
-      case 'contact':
-        offset = height * 4;
-        break;
-    }
-
+    double offset = switch (section) {
+      'about' => height,
+      'skills' => height * 2,
+      'projects' => height * 3,
+      'contact' => height * 4,
+      _ => 0,
+    };
     scrollController?.animateTo(
       offset,
       duration: const Duration(milliseconds: 800),
@@ -257,7 +241,6 @@ class HeroSection extends StatelessWidget {
 
 class _ScrollIndicator extends StatefulWidget {
   final VoidCallback? onTap;
-
   const _ScrollIndicator({this.onTap});
 
   @override
@@ -278,32 +261,30 @@ class _ScrollIndicatorState extends State<_ScrollIndicator>
       right: 0,
       child: AnimatedBuilder(
         animation: _anim,
-        builder: (context, child) {
-          return MagneticButton(
-            radius: 60,
-            onTap: widget.onTap,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Scroll to discover',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  ),
+        builder: (context, child) => MagneticButton(
+          radius: 60,
+          onTap: widget.onTap,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Scroll to discover',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
-                const SizedBox(height: 8),
-                Transform.translate(
-                  offset: Offset(0, _anim.value),
-                  child: Icon(
-                    Icons.keyboard_arrow_down,
-                    color: theme.colorScheme.primary,
-                    size: 32,
-                  ),
+              ),
+              const SizedBox(height: 8),
+              Transform.translate(
+                offset: Offset(0, _anim.value),
+                child: Icon(
+                  LucideIcons.chevronsDown,
+                  color: theme.colorScheme.primary,
+                  size: 32,
                 ),
-              ],
-            ),
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -342,7 +323,6 @@ class _SocialButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return MagneticButton(
       radius: 40,
       onTap: onPressed,

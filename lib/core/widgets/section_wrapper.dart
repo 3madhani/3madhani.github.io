@@ -37,10 +37,12 @@ class SectionWrapper extends StatelessWidget {
             context,
           ).copyWith(top: isMobile ? 60 : 100, bottom: isMobile ? 60 : 100),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (title != null || subtitle != null) ...[
             // Section Header
             Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (title != null)
                   Text(
@@ -71,13 +73,13 @@ class SectionWrapper extends StatelessWidget {
       ),
     );
 
-    final contentWithScroll = SingleChildScrollView(child: sectionContent);
-
+    // Don't wrap in SingleChildScrollView - parent handles scrolling
     if (enableRevealAnimation) {
       return RevealAnimation(
+        delay: animationDelay ?? Duration.zero,
         duration: const Duration(milliseconds: 800),
         offset: const Offset(0, 50),
-        child: contentWithScroll,
+        child: sectionContent,
       );
     }
 

@@ -28,7 +28,7 @@ class ProjectsSection extends StatelessWidget {
     final theme = Theme.of(context);
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < 600;
-    final isTablet = width < 1024 && !isMobile;
+    final isTablet = width >= 600 && width < 1024;
 
     final categories = [
       ProjectCategory.all,
@@ -46,21 +46,22 @@ class ProjectsSection extends StatelessWidget {
 
     return Stack(
       clipBehavior: Clip.none,
-      alignment: Alignment.topCenter,
       children: [
         const Positioned.fill(child: FloatingShapes(shapeCount: 4)),
         SectionWrapper(
+          enableRevealAnimation: true,
           title: 'Magical Creations',
           subtitle: "Some enchanting things I've built",
           backgroundColor: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              theme.colorScheme.primaryContainer.withOpacity(0.0999),
+              theme.colorScheme.primaryContainer.withOpacity(0.1),
               theme.colorScheme.surface.withOpacity(0.1),
             ],
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Filter Chips
               RevealAnimation(
@@ -97,34 +98,29 @@ class ProjectsSection extends StatelessWidget {
                 duration: const Duration(milliseconds: 400),
                 child: projects.isEmpty
                     ? _buildEmptyState(context)
-                    : Container(
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.sizeOf(context).width,
-                        ),
-                        child: MasonryGridView.count(
-                          clipBehavior: Clip.none,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisCount: crossAxisCount,
-                          mainAxisSpacing: 24,
-                          crossAxisSpacing: 24,
-                          itemCount: projects.length,
-                          itemBuilder: (context, index) {
-                            final project = projects[index];
-                            final delay = (index * 0.08).clamp(0.0, 0.8);
+                    : LayoutBuilder(
+                        builder: (context, constraints) {
+                          return MasonryGridView.count(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            crossAxisCount: crossAxisCount,
+                            mainAxisSpacing: 24,
+                            crossAxisSpacing: 24,
+                            itemCount: projects.length,
+                            itemBuilder: (context, index) {
+                              final project = projects[index];
+                              final delay = (index * 0.08).clamp(0.0, 0.8);
 
-                            return TweenAnimationBuilder<double>(
-                              duration: Duration(
-                                milliseconds: 300 + index * 100,
-                              ),
-                              tween: Tween(begin: 0.0, end: 1.0),
-                              builder: (context, value, child) {
-                                final t = (value - delay).clamp(0.0, 1.0);
-                                final eased = Curves.easeOutBack.transform(t);
-                                return Transform.translate(
-                                  offset: Offset(0, (1 - eased) * 50),
-                                  child: Opacity(
-                                    opacity: t,
+                              return TweenAnimationBuilder<double>(
+                                duration: Duration(
+                                  milliseconds: 300 + (index * 100),
+                                ),
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                builder: (context, value, child) {
+                                  final t = (value - delay).clamp(0.0, 1.0);
+                                  final eased = Curves.easeOutBack.transform(t);
+                                  return Transform.translate(
+                                    offset: Offset(0, (1 - eased) * 180),
                                     child: isMobile || isTablet
                                         ? ProjectCard(
                                             project: project,
@@ -142,12 +138,12 @@ class ProjectsSection extends StatelessWidget {
                                               ),
                                             ),
                                           ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
                       ),
               ),
             ],
@@ -162,11 +158,12 @@ class ProjectsSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(48),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             Icons.search_off,
-            size: 64,
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
+            size: 120,
+            color: theme.colorScheme.primary.withOpacity(0.3),
           ),
           const SizedBox(height: 16),
           Text('No projects found', style: theme.textTheme.headlineSmall),

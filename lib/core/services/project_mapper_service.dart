@@ -1,8 +1,9 @@
+// lib/core/services/project_mapper_service.dart
 import '../../feature/portfolio/domain/entities/project.dart';
 import '../services/github_service.dart';
 
 class ProjectMapperService {
-  static final List<String> _knownTechnologies = [
+  static const _knownTechnologies = [
     'flutter',
     'react',
     'vue',
@@ -30,26 +31,42 @@ class ProjectMapperService {
   ];
 
   static List<Project> mapGitHubReposToProjects(List<GitHubRepo> repos) {
-    return repos.map((repo) => _mapSingleRepo(repo)).toList();
+    return repos.map(_mapSingleRepo).toList();
+  }
+
+  static Project _mapSingleRepo(GitHubRepo repo) {
+    final isFeatured = repo.topics.contains('featured');
+    final category = _determineCategory(repo.language, repo.topics);
+    final color = _getLanguageColor(repo.language);
+    final technologies = _extractTechnologies(repo.language, repo.topics);
+
+    return Project(
+      title: _formatTitle(repo.name),
+      description: repo.description,
+      category: category,
+      githubUrl: repo.htmlUrl,
+      demoUrl: repo.homepageUrl,
+      imageUrl: repo.imageUrl,
+      technologies: technologies,
+      isFeatured: isFeatured,
+      color: color,
+    );
   }
 
   static ProjectCategory _determineCategory(
     String? language,
     List<String> topics,
   ) {
-    if (topics.contains('flutter') ||
-        topics.contains('mobile') ||
-        topics.contains('android') ||
-        topics.contains('ios')) {
+    if (topics.any(
+      (t) => ['flutter', 'mobile', 'android', 'ios'].contains(t.toLowerCase()),
+    )) {
       return ProjectCategory.mobile;
     }
-    if (topics.contains('web') ||
-        topics.contains('frontend') ||
-        topics.contains('html') ||
-        topics.contains('css')) {
+    if (topics.any(
+      (t) => ['web', 'frontend', 'html', 'css'].contains(t.toLowerCase()),
+    )) {
       return ProjectCategory.web;
     }
-
     switch (language?.toLowerCase()) {
       case 'dart':
         return ProjectCategory.mobile;
@@ -69,18 +86,13 @@ class ProjectMapperService {
     String? language,
     List<String> topics,
   ) {
-    final Set<String> techs = {};
-
-    if (language != null) {
-      techs.add(_formatTechName(language));
-    }
-
-    final techTopics = topics.where(
-      (topic) => _knownTechnologies.contains(topic.toLowerCase()),
+    final techs = <String>{};
+    if (language != null) techs.add(_formatTechName(language));
+    techs.addAll(
+      topics
+          .where((t) => _knownTechnologies.contains(t.toLowerCase()))
+          .map(_formatTechName),
     );
-
-    techs.addAll(techTopics.map((t) => _formatTechName(t)));
-
     return techs.take(6).toList();
   }
 
@@ -88,36 +100,13 @@ class ProjectMapperService {
     switch (tech.toLowerCase()) {
       case 'nodejs':
         return 'Node.js';
-      case 'flutter':
-        return 'Flutter';
-      case 'react':
-        return 'React';
-      case 'MVVM':
-        return 'MVVM';
       case 'bloc':
         return 'BLoC';
-      case 'postgresql':
-        return 'PostgreSQL';
-      case 'mongodb':
-        return 'MongoDB';
       case 'clean-architecture':
         return 'Clean Architecture';
       default:
-        return tech.substring(0, 1).toUpperCase() + tech.substring(1);
+        return tech[0].toUpperCase() + tech.substring(1);
     }
-  }
-
-  static String _formatTitle(String repoName) {
-    return repoName
-        .split('_')
-        .map((word) => word.split('-'))
-        .expand((words) => words)
-        .map(
-          (word) => word.isEmpty
-              ? ''
-              : word[0].toUpperCase() + word.substring(1).toLowerCase(),
-        )
-        .join(' ');
   }
 
   static String _getLanguageColor(String? language) {
@@ -126,64 +115,25 @@ class ProjectMapperService {
         return '#0175C2';
       case 'javascript':
         return '#F7DF1E';
-      case 'typescript':
-        return '#3178C6';
       case 'python':
         return '#3776AB';
-      case 'java':
-        return '#ED8B00';
-      case 'kotlin':
-        return '#7F52FF';
-      case 'swift':
-        return '#FA7343';
       case 'html':
         return '#E34F26';
-      case 'css':
-        return '#1572B6';
-      case 'vue':
-        return '#4FC08D';
-      case 'react':
-        return '#61DAFB';
       default:
         return '#6366F1';
     }
   }
 
-  static bool _isFeaturedProject(GitHubRepo repo) {
-    if (repo.stargazersCount > 0) return true;
-    if (repo.homepageUrl != null) return true;
-    if (repo.topics.contains('flutter')) return true;
-    if (repo.topics.contains('featured')) return true;
-
-    final featuredNames = [
-      'fruit_hub',
-      'bookly',
-      'talkverse',
-      'flavodish',
-      'social_posts',
-      'portfolio',
-    ];
-
-    return featuredNames.any(
-      (name) => repo.name.toLowerCase().contains(name.toLowerCase()),
-    );
-  }
-
-  static Project _mapSingleRepo(GitHubRepo repo) {
-    final category = _determineCategory(repo.language, repo.topics);
-    final isFeatured = _isFeaturedProject(repo);
-    final color = _getLanguageColor(repo.language);
-    final technologies = _extractTechnologies(repo.language, repo.topics);
-
-    return Project(
-      title: _formatTitle(repo.name),
-      description: repo.description,
-      category: category,
-      githubUrl: repo.htmlUrl,
-      demoUrl: repo.homepageUrl,
-      technologies: technologies,
-      isFeatured: isFeatured,
-      color: color,
-    );
+  static String _formatTitle(String repoName) {
+    return repoName
+        .replaceAll('-', ' ')
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map(
+          (w) => w.isEmpty
+              ? ''
+              : w[0].toUpperCase() + w.substring(1).toLowerCase(),
+        )
+        .join(' ');
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:test_app/core/widgets/animated_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -148,26 +149,26 @@ class ContactSection extends StatelessWidget {
           // Contact info cards
           _ContactInfoCard(
             onTap: () => _launchUrl('mailto:$contactEmail'),
-            icon: Icons.email_outlined,
+            icon: LucideIcons.mail,
             title: 'Email',
             content: contactEmail,
           ),
           const SizedBox(height: 16),
           _ContactInfoCard(
             onTap: () => _launchUrl('tel:$contactPhone'),
-            icon: Icons.phone_outlined,
+            icon: LucideIcons.phoneCall,
             title: 'Phone',
             content: contactPhone,
           ),
           const SizedBox(height: 16),
           _ContactInfoCard(
-            icon: Icons.location_on_outlined,
+            icon: LucideIcons.mapPin,
             title: 'Location',
             content: contactLocation,
           ),
           const SizedBox(height: 16),
           _ContactInfoCard(
-            icon: Icons.work_outline,
+            icon: LucideIcons.zap,
             title: 'Status',
             content: 'Open to remote, onsite, and freelance opportunities',
           ),
@@ -283,7 +284,7 @@ class _ContactInfoCardState extends State<_ContactInfoCard>
                 if (widget.onTap != null) ...[
                   const SizedBox(width: 8),
                   Icon(
-                    Icons.open_in_new,
+                    LucideIcons.externalLink,
                     size: 16,
                     color: theme.colorScheme.onSurface.withOpacity(0.5),
                   ),
@@ -383,15 +384,15 @@ class _SocialLinks extends StatelessWidget {
 
     // Real social links from personal data
     final socialLinks = [
-      {'icon': Icons.code, 'label': 'GitHub', 'url': githubUrl},
-      {'icon': Icons.work_outline, 'label': 'LinkedIn', 'url': linkedInUrl},
+      {'icon': LucideIcons.github, 'label': 'GitHub', 'url': githubUrl},
+      {'icon': LucideIcons.linkedin, 'label': 'LinkedIn', 'url': linkedInUrl},
       {
         'icon': Icons.email_outlined,
         'label': 'Email',
         'url': 'mailto:$contactEmail',
       },
       {
-        'icon': Icons.phone_outlined,
+        'icon': LucideIcons.phoneCall,
         'label': 'WhatsApp',
         'url':
             'https://wa.me/${contactPhone.replaceAll('+', '').replaceAll(' ', '')}',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class ScrollToTopButton extends StatefulWidget {
   final ScrollController scrollController;
@@ -44,7 +45,7 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton>
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,
                 elevation: 4,
-                child: const Icon(Icons.keyboard_arrow_up),
+                child: const Icon(LucideIcons.arrowUp),
               ),
             ),
           ),

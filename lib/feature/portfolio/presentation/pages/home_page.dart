@@ -24,6 +24,7 @@ import 'sections/skills_section.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -36,7 +37,7 @@ class _AppBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   final VoidCallback? onPalettePressed;
   final Widget? leading;
 
-  _AppBarHeaderDelegate({
+  const _AppBarHeaderDelegate({
     this.leading,
     required this.currentIndex,
     required this.onSectionTapped,
@@ -68,7 +69,7 @@ class _AppBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  bool shouldRebuild(_AppBarHeaderDelegate oldDelegate) {
+  bool shouldRebuild(covariant _AppBarHeaderDelegate oldDelegate) {
     return oldDelegate.currentIndex != currentIndex ||
         oldDelegate.sectionTitles != sectionTitles ||
         oldDelegate.titleText != titleText;
@@ -76,18 +77,19 @@ class _AppBarHeaderDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _themePanelVisible = false;
-  bool _showLoading = true;
-  int _currentIndex = 0;
-  final ScrollController _scrollController = ScrollController();
-  final List<GlobalKey> _sectionKeys = List.generate(5, (_) => GlobalKey());
-  final List<String> _sectionTitles = [
+  static const List<String> _sectionTitles = [
     'Home',
     'About',
     'Skills',
     'Projects',
     'Contact',
   ];
+  bool _themePanelVisible = false;
+  bool _showLoading = true;
+  int _currentIndex = 0;
+  late final ScrollController _scrollController;
+
+  late final List<GlobalKey> _sectionKeys;
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +97,11 @@ class _HomePageState extends State<HomePage> {
 
     if (_showLoading) {
       return LoadingScreen(
-        onComplete: () => setState(() => _showLoading = false),
+        onComplete: () {
+          if (mounted) {
+            setState(() => _showLoading = false);
+          }
+        },
       );
     }
 
@@ -103,88 +109,20 @@ class _HomePageState extends State<HomePage> {
       enabled: isDesktop,
       child: Scaffold(
         drawerScrimColor: Colors.transparent,
-        drawer: !isDesktop
-            ? Drawer(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
-                ),
-                backgroundColor: Colors.transparent,
-                child: CustomNavigationRail(
-                  selectedIndex: _currentIndex,
-                  onDestinationSelected: (i) {
-                    Navigator.pop(context);
-                    _scrollTo(i);
-                  },
-                  sectionTitles: _sectionTitles,
-                ),
-              )
-            : null,
+        drawer: !isDesktop ? _buildDrawer() : null,
         body: Stack(
           children: [
-            // Main scrollable content and AppBar
-            CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _AppBarHeaderDelegate(
-                    leading: !isDesktop
-                        ? Builder(
-                            builder: (context) => IconButton(
-                              icon: const Icon(Icons.menu),
-                              onPressed: () =>
-                                  Scaffold.of(context).openDrawer(),
-                            ),
-                          )
-                        : null,
-                    currentIndex: _currentIndex,
-                    sectionTitles: !isDesktop ? [] : _sectionTitles,
-                    onSectionTapped: _scrollTo,
-                    titleText: contactName,
-                    onPalettePressed: () => setState(() {
-                      if (!_themePanelVisible) {
-                        _themePanelVisible = true;
-                      } else {
-                        _themePanelVisible = false;
-                      }
-                    }),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: BlocBuilder<PortfolioBloc, PortfolioState>(
-                    builder: (context, state) {
-                      if (state is PortfolioLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (state is PortfolioError) {
-                        return _buildError(state.message);
-                      }
-                      if (state is PortfolioLoaded) {
-                        return _buildSections(state);
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                ),
-              ],
-            ),
-
-            Positioned(bottom: 0, right: 0, child: PerformanceMonitor()),
-            Positioned(
-              bottom: 20,
-              right: 0,
-              child: isDesktop
-                  ? ScrollToTopButton(scrollController: _scrollController)
-                  : const SizedBox.shrink(),
-            ),
-
-            // ThemePanel overlays everything when visible
+            _buildMainContent(isDesktop),
+            const PerformanceMonitor(),
+            if (isDesktop)
+              ScrollToTopButton(scrollController: _scrollController),
             ThemePanel(
               isVisible: _themePanelVisible,
-              onClose: () => setState(() => _themePanelVisible = false),
+              onClose: () {
+                if (mounted) {
+                  setState(() => _themePanelVisible = false);
+                }
+              },
             ),
           ],
         ),
@@ -202,102 +140,224 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _sectionKeys = List.generate(5, (_) => GlobalKey());
+
     context.read<PortfolioBloc>().add(const LoadPortfolioData());
-    _scrollController.addListener(_onScroll);
+
+    // Add listener after frame is built to avoid layout issues
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _scrollController.addListener(_onScroll);
+      }
+    });
   }
 
-  Widget _buildError(String message) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.error_outline,
-          size: 64,
-          color: Theme.of(context).colorScheme.error,
+  Widget _buildDrawer() {
+    return Drawer(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16),
+          bottomRight: Radius.circular(16),
         ),
-        const SizedBox(height: 16),
-        Text(
-          'Oops! Something went wrong',
-          style: Theme.of(context).textTheme.headlineSmall,
+      ),
+      backgroundColor: Colors.transparent,
+      child: CustomNavigationRail(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (i) {
+          Navigator.pop(context);
+          _scrollTo(i);
+        },
+        sectionTitles: _sectionTitles,
+      ),
+    );
+  }
+
+  Widget _buildError(String message) {
+    return SizedBox(
+      height: 400,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Oops! Something went wrong',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'Error: $message',
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () =>
+                  context.read<PortfolioBloc>().add(const LoadPortfolioData()),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          'Error: $message',
-          textAlign: TextAlign.center,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const SizedBox(
+      height: 400,
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildMainContent(bool isDesktop) {
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _AppBarHeaderDelegate(
+            leading: !isDesktop ? _buildMenuButton() : null,
+            currentIndex: _currentIndex,
+            sectionTitles: isDesktop ? _sectionTitles : const [],
+            onSectionTapped: _scrollTo,
+            titleText: contactName,
+            onPalettePressed: _toggleThemePanel,
+          ),
         ),
-        const SizedBox(height: 24),
-        FilledButton.icon(
-          onPressed: () =>
-              context.read<PortfolioBloc>().add(const LoadPortfolioData()),
-          icon: const Icon(Icons.refresh),
-          label: const Text('Retry'),
+        SliverToBoxAdapter(
+          child: BlocBuilder<PortfolioBloc, PortfolioState>(
+            builder: (context, state) {
+              if (state is PortfolioLoading) {
+                return _buildLoadingState();
+              }
+              if (state is PortfolioError) {
+                return _buildError(state.message);
+              }
+              if (state is PortfolioLoaded) {
+                return _buildSections(state);
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ],
-    ),
-  );
+    );
+  }
+
+  Widget _buildMenuButton() {
+    return Builder(
+      builder: (context) => IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: () => Scaffold.of(context).openDrawer(),
+      ),
+    );
+  }
 
   Widget _buildSections(PortfolioLoaded state) {
-    final sections = [
-      SizedBox(
-        key: _sectionKeys[0],
-        child: HeroSection(
-          scrollController: _scrollController,
-          onViewProjects: () => _scrollTo(3),
-          onContactMe: () => _scrollTo(4),
+    return Column(
+      children: [
+        SizedBox(
+          key: _sectionKeys[0],
+          child: HeroSection(
+            scrollController: _scrollController,
+            onViewProjects: () => _scrollTo(3),
+            onContactMe: () => _scrollTo(4),
+          ),
         ),
-      ),
-      SizedBox(
-        key: _sectionKeys[1],
-        child: AboutSection(
-          experiences: state.experiences,
-          projects: state.projects,
+        SizedBox(
+          key: _sectionKeys[1],
+          child: AboutSection(
+            experiences: state.experiences,
+            projects: state.projects,
+          ),
         ),
-      ),
-      SizedBox(
-        key: _sectionKeys[2],
-        child: SkillsSection(skills: state.skills),
-      ),
-      SizedBox(
-        key: _sectionKeys[3],
-        child: ProjectsSection(
-          projects: state.filteredProjects,
-          selectedCategory: state.selectedCategory,
+        SizedBox(
+          key: _sectionKeys[2],
+          child: SkillsSection(skills: state.skills),
         ),
-      ),
-      SizedBox(key: _sectionKeys[4], child: const ContactSection()),
-    ];
-    return Column(children: sections);
+        SizedBox(
+          key: _sectionKeys[3],
+          child: ProjectsSection(
+            projects: state.filteredProjects,
+            selectedCategory: state.selectedCategory,
+          ),
+        ),
+        SizedBox(key: _sectionKeys[4], child: const ContactSection()),
+      ],
+    );
   }
 
   void _onScroll() {
-    final offset = _scrollController.offset;
-    final height = MediaQuery.of(context).size.height;
-    for (var i = 0; i < _sectionKeys.length; i++) {
-      final ctx = _sectionKeys[i].currentContext;
-      if (ctx != null) {
-        final box = ctx.findRenderObject() as RenderBox;
-        final pos = box.localToGlobal(Offset.zero).dy + offset;
-        if (offset >= pos - height / 2 &&
-            offset < pos + box.size.height - height / 2) {
-          if (_currentIndex != i) setState(() => _currentIndex = i);
-          break;
+    if (!mounted || !_scrollController.hasClients) return;
+
+    try {
+      final offset = _scrollController.offset;
+      final height = MediaQuery.of(context).size.height;
+
+      for (var i = 0; i < _sectionKeys.length; i++) {
+        final ctx = _sectionKeys[i].currentContext;
+        if (ctx == null || !ctx.mounted) continue;
+
+        final renderBox = ctx.findRenderObject();
+        if (renderBox is! RenderBox ||
+            !renderBox.hasSize ||
+            !renderBox.attached) {
+          continue;
+        }
+
+        try {
+          final pos = renderBox.localToGlobal(Offset.zero).dy + offset;
+          final sectionHeight = renderBox.size.height;
+
+          if (offset >= pos - height / 2 &&
+              offset < pos + sectionHeight - height / 2) {
+            if (_currentIndex != i && mounted) {
+              setState(() => _currentIndex = i);
+            }
+            break;
+          }
+        } catch (_) {
+          // Ignore errors during coordinate transformation
+          continue;
         }
       }
+    } catch (_) {
+      // Ignore any unexpected errors
     }
   }
 
   void _scrollTo(int index) {
+    if (index < 0 || index >= _sectionKeys.length) return;
+
     final ctx = _sectionKeys[index].currentContext;
-    if (ctx != null) {
+    if (ctx != null && ctx.mounted) {
       Scrollable.ensureVisible(
         ctx,
         duration: const Duration(milliseconds: 600),
         curve: Curves.easeInOut,
       );
+
+      if (mounted) {
+        setState(() => _currentIndex = index);
+      }
     }
-    setState(() => _currentIndex = index);
+  }
+
+  void _toggleThemePanel() {
+    if (mounted) {
+      setState(() => _themePanelVisible = !_themePanelVisible);
+    }
   }
 }

@@ -1,37 +1,24 @@
+// lib/injection_container.dart
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 
-import 'feature/portfolio/data/datasources/portfolio_local_datasource.dart';
-import 'feature/portfolio/data/repositories/portfolio_repository_impl.dart';
-import 'feature/portfolio/domain/repositories/portfolio_repository.dart';
-import 'feature/portfolio/domain/usecases/get_experience.dart';
-import 'feature/portfolio/domain/usecases/get_projects.dart';
-import 'feature/portfolio/domain/usecases/get_skills.dart';
+import 'core/services/enhanced_portfolio_service.dart';
+import 'core/services/github_service.dart';
 import 'feature/portfolio/presentation/bloc/portfolio_bloc/portfolio_bloc.dart';
 import 'feature/portfolio/presentation/bloc/theme_cubit/theme_cubit.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  // Bloc
+  await dotenv.load(fileName: '.env');
+  final token = dotenv.env['GITHUB_TOKEN'];
+  // Services
+  sl.registerLazySingleton(() => GitHubService(token: token));
+  sl.registerLazySingleton(() => EnhancedPortfolioService(sl<GitHubService>()));
+
+  // BLoCs
   sl.registerFactory(
-    () =>
-        PortfolioBloc(getProjects: sl(), getSkills: sl(), getExperience: sl()),
+    () => PortfolioBloc(portfolioService: sl<EnhancedPortfolioService>()),
   );
-
   sl.registerLazySingleton(() => ThemeCubit());
-
-  // Use cases
-  sl.registerLazySingleton(() => GetProjects(sl()));
-  sl.registerLazySingleton(() => GetSkills(sl()));
-  sl.registerLazySingleton(() => GetExperience(sl()));
-
-  // Repository
-  sl.registerLazySingleton<PortfolioRepository>(
-    () => PortfolioRepositoryImpl(localDataSource: sl()),
-  );
-
-  // Data sources
-  sl.registerLazySingleton<PortfolioLocalDatasource>(
-    () => PortfolioLocalDatasource(),
-  );
 }

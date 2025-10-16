@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class FloatingElement extends StatefulWidget {
   final IconData icon;
@@ -25,10 +26,10 @@ class _FloatingElementsState extends State<FloatingElements>
   late List<Animation<double>> _animations;
 
   final List<IconData> _icons = [
-    Icons.flutter_dash,
-    Icons.code,
+    Icons.flutter_dash_outlined,
+    LucideIcons.code2,
     Icons.local_fire_department,
-    Icons.web,
+    LucideIcons.smartphone,
   ];
 
   @override
