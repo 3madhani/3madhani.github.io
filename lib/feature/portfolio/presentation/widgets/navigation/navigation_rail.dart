@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:test_app/feature/portfolio/data/personal_data.dart';
 
 import '../../../../../core/widgets/glass_container.dart';
@@ -138,15 +139,15 @@ class CustomNavigationRail extends StatelessWidget {
   IconData _getSectionIcon(int index) {
     switch (index) {
       case 0:
-        return Icons.home_rounded;
+        return LucideIcons.home;
       case 1:
-        return Icons.person_rounded;
+        return LucideIcons.user2;
       case 2:
-        return Icons.code_rounded;
+        return LucideIcons.code2;
       case 3:
-        return Icons.work_rounded;
+        return LucideIcons.codesandbox;
       case 4:
-        return Icons.contact_mail_rounded;
+        return Icons.contact_mail_outlined;
       default:
         return Icons.circle;
     }

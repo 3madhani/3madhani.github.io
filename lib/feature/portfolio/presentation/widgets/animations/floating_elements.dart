@@ -50,7 +50,7 @@ class _FloatingElementsState extends State<FloatingElements>
               final angle = _animations[index].value;
               final radius = 120.0 + (index * 20);
               final x = math.cos(angle) * radius + 200;
-              final y = math.sin(angle) * radius + 200;
+              final y = math.sin(angle) * radius + 260;
 
               return Positioned(
                 left: x,
