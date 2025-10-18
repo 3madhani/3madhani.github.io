@@ -9,7 +9,8 @@ flutter clean
 flutter pub get
 
 # Step 2: Define your GitHub Pages base path
-$baseHref = "/3madhani.github.io/"
+# ✅ FIXED: Use "/" for username.github.io sites (not "/repo-name/")
+$baseHref = "/"
 
 # Step 3: Replace $FLUTTER_BASE_HREF in web/index.html temporarily
 $indexFile = "web\index.html"
@@ -49,3 +50,4 @@ git push origin gh-pages-temp:gh-pages --force
 git branch -D gh-pages-temp
 
 Write-Host "✅ Deployment complete! Visit https://3madhani.github.io"
+Write-Host "⏳ Note: It may take 1-2 minutes for changes to appear. Clear cache with Ctrl+Shift+R"
