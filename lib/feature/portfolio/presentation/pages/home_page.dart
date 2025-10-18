@@ -240,7 +240,11 @@ class _HomePageState extends State<HomePage> {
           child: BlocBuilder<PortfolioBloc, PortfolioState>(
             builder: (context, state) {
               if (state is PortfolioLoading) {
-                return _buildLoadingState();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [_buildLoadingState()],
+                );
               }
               if (state is PortfolioError) {
                 return _buildError(state.message);

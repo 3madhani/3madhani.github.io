@@ -1,7 +1,6 @@
-// lib/features/portfolio/presentation/widgets/cards/project_card.dart
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../domain/entities/project.dart';
@@ -26,22 +25,15 @@ class _ProjectCardState extends State<ProjectCard>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-
-    // Responsive breakpoints
+    final width = MediaQuery.of(context).size.width;
     final isMobile = width < 600;
     final isTablet = width >= 600 && width < 1024;
 
-    // Adaptive sizing
     final imageHeight = _getImageHeight(width);
     final iconSize = _getIconSize(width);
-    final cardPadding = _getCardPadding(isMobile);
-    final borderRadius = _getBorderRadius(isMobile);
-    final techChipPadding = _getTechChipPadding(isMobile);
-    final buttonHeight = _getButtonHeight(isMobile);
-    final spacing = _getSpacing(isMobile);
-
+    final cardPadding = isMobile ? 12.0 : 16.0;
+    final borderRadius = isMobile ? 12.0 : 16.0;
+    final spacing = isMobile ? 8.0 : 12.0;
     final color = _parseColor(widget.project.color);
 
     return MouseRegion(
@@ -65,28 +57,14 @@ class _ProjectCardState extends State<ProjectCard>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header Image/Icon Section
-                _buildHeader(
-                  context,
-                  theme,
-                  color,
-                  imageHeight,
-                  iconSize,
-                  isMobile,
-                ),
-
-                // Content Section
+                _buildHeader(theme, color, imageHeight, iconSize, isMobile),
                 Padding(
                   padding: EdgeInsets.all(cardPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Title with category badge
                       _buildTitleRow(theme, isMobile, isTablet),
                       SizedBox(height: spacing),
-
-                      // Description
                       Text(
                         widget.project.description,
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -98,22 +76,13 @@ class _ProjectCardState extends State<ProjectCard>
                         overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: spacing * 1.5),
-
-                      // Technologies
-                      _buildTechChips(theme, techChipPadding, isMobile),
+                      _buildTechChips(theme, isMobile),
                     ],
                   ),
                 ),
-
-                // Action Buttons
                 Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    cardPadding,
-                    0,
-                    cardPadding,
-                    cardPadding,
-                  ),
-                  child: _buildActionButtons(theme, buttonHeight, isMobile),
+                  padding: EdgeInsets.all(cardPadding),
+                  child: _buildActionButtons(theme, isMobile),
                 ),
               ],
             ),
@@ -150,47 +119,27 @@ class _ProjectCardState extends State<ProjectCard>
     ).animate(CurvedAnimation(parent: _hoverController, curve: Curves.easeOut));
   }
 
-  Widget _buildActionButtons(
-    ThemeData theme,
-    double buttonHeight,
-    bool isMobile,
-  ) {
+  Widget _buildActionButtons(ThemeData theme, bool isMobile) {
     final hasDemo = widget.project.demoUrl != null;
-
     return Row(
       children: [
         Expanded(
-          child: SizedBox(
-            height: buttonHeight,
-            child: OutlinedButton.icon(
-              onPressed: () => _openUrl(widget.project.githubUrl),
-              icon: Icon(LucideIcons.github, size: isMobile ? 14 : 16),
-              label: Text(
-                isMobile ? 'Code' : 'Source',
-                style: TextStyle(fontSize: isMobile ? 12 : 14),
-              ),
-              style: OutlinedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 12),
-              ),
-            ),
+          child: OutlinedButton.icon(
+            onPressed: () => _openUrl(widget.project.githubUrl),
+            icon: const Icon(FontAwesomeIcons.github, size: 14),
+            label: Text(isMobile ? 'Code' : 'Source'),
           ),
         ),
         if (hasDemo) ...[
-          SizedBox(width: isMobile ? 6 : 8),
+          const SizedBox(width: 8),
           Expanded(
-            child: SizedBox(
-              height: buttonHeight,
-              child: FilledButton.icon(
-                onPressed: () => _openUrl(widget.project.demoUrl!),
-                icon: Icon(LucideIcons.externalLink, size: isMobile ? 14 : 16),
-                label: Text(
-                  'Demo',
-                  style: TextStyle(fontSize: isMobile ? 12 : 14),
-                ),
-                style: FilledButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 12),
-                ),
+            child: FilledButton.icon(
+              onPressed: () => _openUrl(widget.project.demoUrl!),
+              icon: const Icon(
+                FontAwesomeIcons.arrowUpRightFromSquare,
+                size: 14,
               ),
+              label: const Text('Demo'),
             ),
           ),
         ],
@@ -199,17 +148,33 @@ class _ProjectCardState extends State<ProjectCard>
   }
 
   Widget _buildCategoryBadge(ThemeData theme, bool isMobile) {
-    final categoryIcon = _getCategoryIcon(widget.project.category);
-    final categoryColor = _getCategoryColor(widget.project.category, theme);
+    final icon = _getCategoryIcon(widget.project.category);
+    final color = _getCategoryColor(widget.project.category, theme);
 
     return Container(
       padding: EdgeInsets.all(isMobile ? 6 : 8),
       decoration: BoxDecoration(
-        color: categoryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(isMobile ? 8 : 10),
-        border: Border.all(color: categoryColor.withOpacity(0.3), width: 1),
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
-      child: Icon(categoryIcon, size: isMobile ? 14 : 16, color: categoryColor),
+      child: Icon(icon, size: isMobile ? 14 : 16, color: color),
+    );
+  }
+
+  Widget _buildFallbackIcon(Color color, double iconSize) {
+    return Center(
+      child: AnimatedBuilder(
+        animation: _iconRotationAnim,
+        builder: (context, child) {
+          return Transform.rotate(angle: _iconRotationAnim.value, child: child);
+        },
+        child: Icon(
+          _getProjectIcon(widget.project.category),
+          size: iconSize,
+          color: color,
+        ),
+      ),
     );
   }
 
@@ -218,40 +183,21 @@ class _ProjectCardState extends State<ProjectCard>
       top: isMobile ? 6 : 8,
       right: isMobile ? 6 : 8,
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 6 : 8,
-          vertical: isMobile ? 3 : 4,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              theme.colorScheme.primary,
-              theme.colorScheme.primary.withOpacity(0.8),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(isMobile ? 10 : 12),
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.primary.withOpacity(0.4),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: theme.colorScheme.primary,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              LucideIcons.star,
-              size: isMobile ? 10 : 12,
-              color: theme.colorScheme.onPrimary,
-            ),
+            const Icon(FontAwesomeIcons.star, size: 10, color: Colors.white),
             const SizedBox(width: 4),
             Text(
               'Featured',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
                 fontSize: isMobile ? 10 : 11,
               ),
             ),
@@ -262,13 +208,15 @@ class _ProjectCardState extends State<ProjectCard>
   }
 
   Widget _buildHeader(
-    BuildContext context,
     ThemeData theme,
     Color color,
     double imageHeight,
     double iconSize,
     bool isMobile,
   ) {
+    final hasImage =
+        widget.project.imageUrl != null && widget.project.imageUrl!.isNotEmpty;
+
     return Container(
       height: imageHeight,
       decoration: BoxDecoration(
@@ -278,130 +226,74 @@ class _ProjectCardState extends State<ProjectCard>
           end: Alignment.bottomRight,
         ),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Stack(
+        fit: StackFit.expand,
         children: [
-          // Decorative circles
-          Positioned(
-            top: -20,
-            right: -20,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withOpacity(0.1),
+          if (hasImage)
+            CachedNetworkImage(
+              imageUrl: widget.project.imageUrl!,
+              fit: BoxFit.fitHeight,
+              placeholder: (context, url) => Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation(color.withOpacity(0.6)),
+                ),
               ),
-            ),
-          ),
-          Positioned(
-            bottom: -30,
-            left: -30,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color.withOpacity(0.05),
-              ),
-            ),
-          ),
-
-          // Main Icon with rotation animation
-          Center(
-            child: AnimatedBuilder(
-              animation: _iconRotationAnim,
-              builder: (context, child) {
-                return Transform.rotate(
-                  angle: _iconRotationAnim.value,
-                  child: child,
-                );
-              },
-              child: Icon(
-                _getProjectIcon(widget.project.category),
-                size: iconSize,
-                color: color,
-              ),
-            ),
-          ),
-
-          // Featured Badge
+              errorWidget: (context, url, error) =>
+                  _buildFallbackIcon(color, iconSize),
+            )
+          else
+            _buildFallbackIcon(color, iconSize),
           if (widget.project.isFeatured) _buildFeaturedBadge(theme, isMobile),
         ],
       ),
     );
   }
 
-  Widget _buildTechChips(ThemeData theme, EdgeInsets padding, bool isMobile) {
-    // Limit technologies shown on mobile
-    final techToShow = isMobile
+  Widget _buildTechChips(ThemeData theme, bool isMobile) {
+    final techs = isMobile
         ? widget.project.technologies.take(4).toList()
         : widget.project.technologies;
-    final hasMore = isMobile && widget.project.technologies.length > 4;
 
     return Wrap(
-      spacing: isMobile ? 4 : 6,
-      runSpacing: isMobile ? 4 : 6,
-      children: [
-        ...techToShow.map((tech) {
-          final techIcon = _getTechnologyIcon(tech);
-          return Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(isMobile ? 6 : 8),
-              border: Border.all(
-                color: theme.colorScheme.outline.withOpacity(0.2),
-                width: 0.5,
+      spacing: 6,
+      runSpacing: 6,
+      children: techs
+          .map(
+            (tech) => Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 6 : 8,
+                vertical: isMobile ? 3 : 4,
+              ),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withOpacity(0.2),
+                  width: 0.5,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _getTechnologyIcon(tech),
+                    size: isMobile ? 10 : 12,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    tech,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: isMobile ? 10 : 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  techIcon,
-                  size: isMobile ? 10 : 12,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  tech,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: isMobile ? 10 : 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-        if (hasMore)
-          Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(isMobile ? 6 : 8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  LucideIcons.plus,
-                  size: isMobile ? 10 : 12,
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  '${widget.project.technologies.length - 4}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontSize: isMobile ? 10 : 12,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
+          )
+          .toList(),
     );
   }
 
@@ -429,12 +321,6 @@ class _ProjectCardState extends State<ProjectCard>
     );
   }
 
-  double _getBorderRadius(bool isMobile) => isMobile ? 12 : 16;
-
-  double _getButtonHeight(bool isMobile) => isMobile ? 36 : 40;
-
-  double _getCardPadding(bool isMobile) => isMobile ? 12 : 16;
-
   Color _getCategoryColor(ProjectCategory category, ThemeData theme) {
     switch (category) {
       case ProjectCategory.mobile:
@@ -451,13 +337,13 @@ class _ProjectCardState extends State<ProjectCard>
   IconData _getCategoryIcon(ProjectCategory category) {
     switch (category) {
       case ProjectCategory.mobile:
-        return LucideIcons.smartphone;
+        return FontAwesomeIcons.mobile;
       case ProjectCategory.web:
-        return LucideIcons.monitor;
+        return FontAwesomeIcons.display;
       case ProjectCategory.featured:
-        return LucideIcons.sparkles;
+        return FontAwesomeIcons.star;
       case ProjectCategory.all:
-        return LucideIcons.layoutGrid;
+        return FontAwesomeIcons.layerGroup;
     }
   }
 
@@ -468,102 +354,37 @@ class _ProjectCardState extends State<ProjectCard>
     return 64;
   }
 
-  // Responsive sizing methods
   double _getImageHeight(double width) {
     if (width < 400) return 100;
     if (width < 600) return 120;
     if (width < 900) return 150;
-    if (width < 1200) return 170;
     return 180;
   }
 
-  // Icon mapping methods
   IconData _getProjectIcon(ProjectCategory category) {
     switch (category) {
       case ProjectCategory.mobile:
-        return LucideIcons.smartphone;
+        return FontAwesomeIcons.mobileScreen;
       case ProjectCategory.web:
-        return LucideIcons.globe;
+        return FontAwesomeIcons.globe;
       case ProjectCategory.featured:
-        return LucideIcons.star;
+        return FontAwesomeIcons.star;
       case ProjectCategory.all:
-        return LucideIcons.layoutGrid;
+        return FontAwesomeIcons.shapes;
     }
-  }
-
-  double _getSpacing(bool isMobile) => isMobile ? 8 : 12;
-
-  EdgeInsets _getTechChipPadding(bool isMobile) {
-    return EdgeInsets.symmetric(
-      horizontal: isMobile ? 6 : 8,
-      vertical: isMobile ? 3 : 4,
-    );
   }
 
   IconData _getTechnologyIcon(String tech) {
-    final techLower = tech.toLowerCase();
-
-    // Mobile & Cross-platform
-    if (techLower.contains('flutter')) return LucideIcons.zap;
-    if (techLower.contains('dart')) return LucideIcons.code2;
-    if (techLower.contains('android')) return LucideIcons.smartphone;
-    if (techLower.contains('ios')) return LucideIcons.smartphone;
-    if (techLower.contains('react native')) return LucideIcons.atom;
-
-    // Frontend
-    if (techLower.contains('react')) return LucideIcons.atom;
-    if (techLower.contains('vue')) return LucideIcons.triangle;
-    if (techLower.contains('angular')) return LucideIcons.shield;
-    if (techLower.contains('svelte')) return LucideIcons.flame;
-    if (techLower.contains('html')) return LucideIcons.fileCode;
-    if (techLower.contains('css')) return LucideIcons.paintbrush;
-    if (techLower.contains('javascript') || techLower.contains('js')) {
-      return LucideIcons.fileType;
-    }
-    if (techLower.contains('typescript') || techLower.contains('ts')) {
-      return LucideIcons.fileType;
-    }
-
-    // Backend
-    if (techLower.contains('node')) return LucideIcons.server;
-    if (techLower.contains('python')) return LucideIcons.terminal;
-    if (techLower.contains('java')) return LucideIcons.coffee;
-    if (techLower.contains('php')) return LucideIcons.fileCode2;
-    if (techLower.contains('ruby')) return LucideIcons.gem;
-    if (techLower.contains('go') || techLower.contains('golang')) {
-      return LucideIcons.terminal;
-    }
-
-    // Databases
-    if (techLower.contains('sql') ||
-        techLower.contains('postgres') ||
-        techLower.contains('mysql')) {
-      return LucideIcons.database;
-    }
-    if (techLower.contains('mongo')) return LucideIcons.leaf;
-    if (techLower.contains('redis')) return LucideIcons.layers;
-
-    // Cloud & Services
-    if (techLower.contains('firebase')) return LucideIcons.flame;
-    if (techLower.contains('aws')) return LucideIcons.cloud;
-    if (techLower.contains('azure')) return LucideIcons.cloudCog;
-    if (techLower.contains('gcp') || techLower.contains('google cloud')) {
-      return LucideIcons.cloudCog;
-    }
-    if (techLower.contains('docker')) return LucideIcons.box;
-    if (techLower.contains('kubernetes')) return LucideIcons.boxes;
-
-    // Tools & Others
-    if (techLower.contains('git')) return LucideIcons.gitBranch;
-    if (techLower.contains('figma')) return LucideIcons.figma;
-    if (techLower.contains('photoshop')) return LucideIcons.image;
-    if (techLower.contains('graphql')) return LucideIcons.network;
-    if (techLower.contains('rest') || techLower.contains('api')) {
-      return LucideIcons.plug;
-    }
-
-    // Default
-    return LucideIcons.code;
+    final t = tech.toLowerCase();
+    if (t.contains('flutter')) return FontAwesomeIcons.bolt;
+    if (t.contains('dart')) return FontAwesomeIcons.code;
+    if (t.contains('firebase')) return FontAwesomeIcons.fire;
+    if (t.contains('node')) return FontAwesomeIcons.server;
+    if (t.contains('python')) return FontAwesomeIcons.python;
+    if (t.contains('java')) return FontAwesomeIcons.java;
+    if (t.contains('git')) return FontAwesomeIcons.gitAlt;
+    if (t.contains('figma')) return FontAwesomeIcons.figma;
+    return FontAwesomeIcons.code;
   }
 
   void _onHover(bool hover) {
@@ -584,20 +405,10 @@ class _ProjectCardState extends State<ProjectCard>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(LucideIcons.alertCircle, size: 20),
-                const SizedBox(width: 8),
-                Text('Failed to open link: $e'),
-              ],
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to open link: $e')));
       }
-      debugPrint('Error opening URL: $e');
     }
   }
 
@@ -605,7 +416,7 @@ class _ProjectCardState extends State<ProjectCard>
     try {
       return Color(int.parse(colorString.replaceAll('#', '0xFF')));
     } catch (e) {
-      return Colors.blue; // Fallback color
+      return Colors.blue;
     }
   }
 }
