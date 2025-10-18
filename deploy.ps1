@@ -2,7 +2,7 @@ Write-Host "🚀 Building Flutter Web..."
 
 flutter clean
 flutter pub get
-flutter build web --release
+flutter build web --release 
 
 # 🧩 Add a timestamp to index.html to break cache
 $indexPath = "build\web\index.html"
