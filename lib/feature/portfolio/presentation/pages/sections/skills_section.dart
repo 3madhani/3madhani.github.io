@@ -35,13 +35,13 @@ class _SkillsSectionState extends State<SkillsSection>
     final width = MediaQuery.of(context).size.width;
 
     // Calculate crossAxisCount based on screen width
-    int crossAxisCount = 1;
+    int crossAxisCount = 2;
     if (width >= 1200) {
-      crossAxisCount = 4;
+      crossAxisCount = 5;
     } else if (width >= 900) {
-      crossAxisCount = 3;
+      crossAxisCount = 4;
     } else if (width >= 600) {
-      crossAxisCount = 2;
+      crossAxisCount = 3;
     }
 
     return Stack(

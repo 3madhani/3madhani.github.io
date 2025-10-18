@@ -421,53 +421,50 @@ class _MobileLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            RevealAnimation(
-              delay: const Duration(milliseconds: 300),
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.colorScheme.primary.withOpacity(0.20),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                  border: Border.all(
-                    color: theme.colorScheme.primary.withOpacity(0.5),
-                    width: 3,
-                  ),
-                  image: const DecorationImage(
-                    image: AssetImage('assets/images/profile_image.png'),
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
-                  ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(height: size.height * 0.05),
+        RevealAnimation(
+          delay: const Duration(milliseconds: 300),
+          child: Container(
+            width: 150,
+            height: 150,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.primary.withOpacity(0.20),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
                 ),
+              ],
+              border: Border.all(
+                color: theme.colorScheme.primary.withOpacity(0.5),
+                width: 3,
+              ),
+              image: const DecorationImage(
+                image: AssetImage('assets/images/profile_image.png'),
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
               ),
             ),
-            const SizedBox(height: 24),
-            _HeroContent(
-              theme: theme,
-              size: size,
-              isDesktop: false,
-              isMobile: true,
-              isTablet: false,
-              onViewProjects: onViewProjects,
-              onContactMe: onContactMe,
-              scrollController: scrollController,
-              context: context,
-            ),
-          ],
+          ),
         ),
-      ),
+        const SizedBox(height: 24),
+        _HeroContent(
+          theme: theme,
+          size: size,
+          isDesktop: false,
+          isMobile: true,
+          isTablet: false,
+          onViewProjects: onViewProjects,
+          onContactMe: onContactMe,
+          scrollController: scrollController,
+          context: context,
+        ),
+      ],
     );
   }
 }

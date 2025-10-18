@@ -110,21 +110,23 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         drawerScrimColor: Colors.transparent,
         drawer: !isDesktop ? _buildDrawer() : null,
-        body: Stack(
-          children: [
-            _buildMainContent(isDesktop),
-            const PerformanceMonitor(),
-            if (isDesktop)
-              ScrollToTopButton(scrollController: _scrollController),
-            ThemePanel(
-              isVisible: _themePanelVisible,
-              onClose: () {
-                if (mounted) {
-                  setState(() => _themePanelVisible = false);
-                }
-              },
-            ),
-          ],
+        body: SafeArea(
+          child: Stack(
+            children: [
+              _buildMainContent(isDesktop),
+              const PerformanceMonitor(),
+              if (isDesktop)
+                ScrollToTopButton(scrollController: _scrollController),
+              ThemePanel(
+                isVisible: _themePanelVisible,
+                onClose: () {
+                  if (mounted) {
+                    setState(() => _themePanelVisible = false);
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
