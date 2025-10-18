@@ -2,7 +2,9 @@ Write-Host "🚀 Building Flutter Web..."
 
 flutter clean
 flutter pub get
-flutter build web --release
+
+# ✅ Correct base href for user/organization GitHub Pages
+flutter build web --release --base-href "/"
 
 # 🧩 Add a timestamp to index.html to break cache
 $indexPath = "build\web\index.html"
